@@ -2581,6 +2581,8 @@ function updateSbRecordingState(isRec) {
   const ind = document.getElementById('sbRecIndicator');
   if (ind) ind.classList.toggle('active', isRec);
 }
+
+function toast(msg, dur = 2800) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
