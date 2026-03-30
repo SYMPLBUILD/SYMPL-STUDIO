@@ -1,0 +1,2593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sympl Studio — Go Live. Look Pro.</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06080e;--surface:#0d1118;--card:#131920;--card2:#1a2230;
+  --border:#1e2a38;--border2:#28394d;
+  --lime:#b8ff57;--lime-dim:#8acc30;--lime-glow:rgba(184,255,87,0.1);
+  --red:#ff4444;--blue:#4d9fff;--amber:#ffb347;--cyan:#22d3ee;
+  --text:#dde6f0;--muted:#7a96a8;--muted2:#2a3a4a;--green:#3dd68c;
+  --label:#a8c0cc;--hint:#6a8898;
+}
+html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text)}
+body{overflow-x:hidden}
+
+/* ─── SCREENS ─── */
+.page{display:none}
+.page.active{display:block}
+#landing.active{display:block}
+#greenRoom.active{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+#studioStub.active{display:flex;flex-direction:column;height:100vh;align-items:center;justify-content:center}
+
+/* ─── TOAST ─── */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:8px 18px;font-size:12px;font-weight:600;opacity:0;transition:all 0.25s;z-index:9999;white-space:nowrap;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ══════════════════════════════════════
+   LANDING PAGE
+══════════════════════════════════════ */
+#landing{min-height:100vh;background:var(--bg)}
+
+/* Nav */
+.land-nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;height:60px;
+  display:flex;align-items:center;padding:0 32px;
+  background:rgba(6,8,14,0.88);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(255,255,255,0.035);
+}
+.land-logo{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--lime);display:flex;align-items:center;gap:9px;text-decoration:none}
+.lmark{width:30px;height:30px;background:var(--lime);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lmark svg{width:15px;height:15px}
+.land-nav-r{margin-left:auto;display:flex;align-items:center;gap:14px}
+.land-badge{font-size:11px;color:var(--muted);font-weight:500;display:none}
+@media(min-width:600px){.land-badge{display:block}}
+.nav-cta{background:var(--lime);color:#000;border:none;border-radius:22px;padding:8px 22px;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:all 0.18s;letter-spacing:0.3px}
+.nav-cta:hover{background:#ccff66;transform:translateY(-1px)}
+
+/* Hero */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:relative;overflow:hidden;padding:100px 20px 60px;text-align:center;
+}
+.hero-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(184,255,87,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(184,255,87,0.025) 1px,transparent 1px);
+  background-size:54px 54px;animation:gridDrift 25s linear infinite;
+}
+@keyframes gridDrift{from{background-position:0 0}to{background-position:54px 54px}}
+.hero-glow{position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:1000px;height:900px;background:radial-gradient(ellipse,rgba(184,255,87,0.05) 0%,transparent 60%);pointer-events:none}
+.hero-eyebrow{
+  font-size:10px;font-weight:600;letter-spacing:5px;text-transform:uppercase;color:var(--lime);
+  margin-bottom:22px;position:relative;z-index:1;display:flex;align-items:center;gap:12px;
+}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';display:block;width:26px;height:1px;background:var(--lime);opacity:0.45}
+h1.hero-title{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:clamp(64px,12vw,148px);line-height:0.86;letter-spacing:-4px;
+  color:var(--text);position:relative;z-index:1;margin-bottom:8px;
+}
+h1.hero-title span{color:var(--lime)}
+.hero-sub{
+  font-family:'Syne',sans-serif;font-size:clamp(12px,2.2vw,22px);font-weight:700;
+  letter-spacing:10px;text-transform:uppercase;color:transparent;
+  -webkit-text-stroke:1px var(--muted);margin-bottom:26px;position:relative;z-index:1;
+}
+.hero-tagline{font-size:clamp(14px,1.8vw,18px);color:var(--hint);margin-bottom:42px;position:relative;z-index:1;max-width:480px;line-height:1.75}
+.hero-tagline strong{color:var(--text);font-weight:600}
+.hero-cta{
+  position:relative;z-index:1;background:var(--lime);color:#000;border:none;
+  border-radius:50px;padding:16px 44px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;
+  cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:10px;
+  box-shadow:0 0 56px rgba(184,255,87,0.25);letter-spacing:0.4px;
+}
+.hero-cta:hover{background:#ccff66;transform:translateY(-3px);box-shadow:0 0 80px rgba(184,255,87,0.4)}
+.hero-cta svg{width:16px;height:16px;transition:transform 0.18s}
+.hero-cta:hover svg{transform:translateX(4px)}
+
+/* Product mock */
+.hero-mock{
+  position:relative;z-index:1;width:100%;max-width:820px;margin:50px auto 0;
+  border-radius:13px;overflow:hidden;border:1px solid var(--border2);
+  box-shadow:0 40px 90px rgba(0,0,0,0.65);
+}
+.mock-bar{height:34px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:6px}
+.mdot{width:9px;height:9px;border-radius:50%}
+.mock-label{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:2px;margin-left:6px}
+.ticker-band{height:30px;background:#000;display:flex;align-items:center;overflow:hidden}
+.tick-run{white-space:nowrap;font-size:11px;font-weight:700;letter-spacing:0.6px;padding-left:100%;animation:tickL 18s linear infinite}
+.tick-run.rev{animation:tickR 22s linear infinite;color:var(--cyan)}
+@keyframes tickL{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes tickR{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+.mock-main{height:190px;background:linear-gradient(135deg,#08121c,#102035,#08121c);position:relative;overflow:hidden}
+.mock-frame{position:absolute;inset:0;border:8px solid var(--lime-dim)}
+.mock-frame::after{content:'';position:absolute;inset:5px;border:1px solid rgba(255,255,255,0.14)}
+.mock-avatar{position:absolute;left:50%;top:50%;transform:translate(-50%,-60%);width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,#14263a,#1e3550);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center}
+.mock-avatar svg{width:28px;height:28px;color:var(--muted);opacity:0.35}
+.mock-rec{position:absolute;top:9px;left:9px;background:var(--red);color:#fff;font-size:9px;font-weight:700;letter-spacing:2px;padding:3px 9px;border-radius:20px;display:flex;align-items:center;gap:4px}
+.rdot{width:5px;height:5px;background:#fff;border-radius:50%;animation:rp 1s infinite}
+@keyframes rp{0%,100%{opacity:1}50%{opacity:0.1}}
+.mock-time{position:absolute;top:9px;right:9px;background:rgba(0,0,0,0.72);color:var(--text);font-family:'Syne',sans-serif;font-size:13px;padding:3px 9px;border-radius:6px}
+.mock-chyron{position:absolute;bottom:35px;left:9px;display:flex;align-items:stretch;border-radius:6px;overflow:hidden;background:rgba(0,0,0,0.88)}
+.chyr-accent{width:4px;background:var(--lime)}
+.chyr-photo{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--lime),var(--cyan));margin:5px 8px}
+.chyr-text{padding:5px 10px 5px 0}
+.chyr-name{font-size:9px;font-weight:700;color:#fff}
+.chyr-role{font-size:8px;color:var(--lime)}
+.mock-btick{position:absolute;bottom:0;left:0;right:0;height:30px;background:rgba(0,0,0,0.9);display:flex;align-items:center;overflow:hidden}
+
+/* Features */
+.features-wrap{max-width:1060px;margin:0 auto;padding:60px 24px}
+.feat-eyebrow{text-align:center;font-size:10px;font-weight:600;letter-spacing:5px;text-transform:uppercase;color:var(--lime);margin-bottom:12px}
+.feat-title{text-align:center;font-family:'Syne',sans-serif;font-size:clamp(26px,4.5vw,46px);font-weight:800;margin-bottom:48px;line-height:1.1}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.feat-card{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:24px;transition:all 0.2s;position:relative;overflow:hidden}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--lime-dim),transparent);opacity:0;transition:opacity 0.2s}
+.feat-card:hover{border-color:var(--border2);transform:translateY(-3px)}
+.feat-card:hover::before{opacity:1}
+.feat-icon{width:40px;height:40px;border-radius:9px;background:var(--lime-glow);border:1px solid rgba(184,255,87,0.18);display:flex;align-items:center;justify-content:center;margin-bottom:13px}
+.feat-icon svg{width:18px;height:18px;color:var(--lime)}
+.feat-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:7px}
+.feat-desc{font-size:12px;color:var(--hint);line-height:1.72}
+
+/* Bottom CTA band */
+.cta-band{padding:60px 20px;text-align:center;background:linear-gradient(to bottom,transparent,rgba(184,255,87,0.022),transparent)}
+.cta-band h2{font-family:'Syne',sans-serif;font-size:clamp(24px,4.5vw,46px);font-weight:800;margin-bottom:12px;line-height:1.1}
+.cta-band p{font-size:14px;color:var(--hint);margin-bottom:34px}
+.land-footer{padding:20px 30px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted)}
+.footer-logo{font-family:'Syne',sans-serif;font-weight:700;color:var(--lime);font-size:12px;display:flex;align-items:center;gap:6px}
+
+
+/* ══════════════════════════════════════
+   GREEN ROOM
+══════════════════════════════════════ */
+.gr-header{height:50px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0}
+.gr-logo{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--lime);display:flex;align-items:center;gap:7px}
+.gr-lmark{width:22px;height:22px;background:var(--lime);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gr-lmark svg{width:11px;height:11px}
+.gr-page-label{font-size:10px;font-weight:600;letter-spacing:3px;color:var(--hint);text-transform:uppercase;margin-left:4px}
+.back-btn{margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 12px;font-size:11px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.back-btn:hover{color:var(--text);border-color:var(--border2)}
+
+.gr-body{flex:1;display:grid;grid-template-columns:1fr 300px;min-height:0;overflow:hidden}
+
+/* Green Room Left */
+.gr-left{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;gap:14px;overflow-y:auto;position:relative}
+.gr-left::after{content:'';position:absolute;top:0;left:0;right:0;height:200px;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(184,255,87,0.03),transparent 70%);pointer-events:none}
+
+.gr-cam-outer{width:100%;max-width:540px;flex-shrink:0}
+.gr-cam-label{font-size:10px;font-weight:600;color:var(--label);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.cam-status-dot{width:6px;height:6px;border-radius:50%;background:var(--muted2);transition:background 0.3s}
+.cam-status-dot.live{background:var(--green)}
+.gr-cam-box{width:100%;aspect-ratio:16/9;background:#000;border-radius:11px;overflow:hidden;border:2px solid var(--border);position:relative;transition:border-color 0.3s,aspect-ratio 0.35s;max-height:72vh}
+.gr-cam-box.live{border-color:var(--lime-dim);box-shadow:0 0 30px rgba(184,255,87,0.06)}
+#grVid{width:100%;height:100%;object-fit:cover;display:none}
+#grVid.flip{transform:scaleX(-1)}
+.gr-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#000}
+.gr-placeholder svg{width:36px;height:36px;color:var(--muted);opacity:0.2}
+.gr-placeholder p{font-size:12px;color:var(--hint);text-align:center;max-width:200px;line-height:1.65}
+.gr-connect-btn{background:var(--lime);color:#000;border:none;border-radius:8px;padding:9px 22px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.18s;pointer-events:all}
+.gr-connect-btn:hover{background:#ccff66}
+
+.gr-mic-outer{width:100%;max-width:540px;flex-shrink:0}
+.gr-mic-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.gr-mic-label{font-size:10px;font-weight:600;color:var(--label);letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.mic-status-dot{width:6px;height:6px;border-radius:50%;background:var(--muted2);transition:background 0.3s}
+.mic-status-dot.active{background:var(--green)}
+.meter-wrap{height:6px;background:var(--card);border-radius:3px;overflow:hidden}
+.meter-fill{height:100%;width:0%;border-radius:3px;background:linear-gradient(90deg,var(--lime) 0%,var(--amber) 70%,var(--red) 100%);transition:width 0.06s}
+.meter-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--hint);margin-top:2px;margin-bottom:8px}
+
+/* Mic test section */
+.mic-test-wrap{width:100%;max-width:540px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 14px;flex-shrink:0}
+.mic-test-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.mic-test-title{font-size:11px;font-weight:600;color:var(--text)}
+.mic-test-status{font-size:10px;color:var(--hint);min-height:14px}
+.mic-test-btns{display:flex;gap:7px}
+.test-action-btn{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:7px;border:1.5px solid var(--border2);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.18s}
+.test-action-btn svg{width:11px;height:11px}
+.test-action-btn.record{border-color:var(--red);color:var(--red)}
+.test-action-btn.record:hover{background:rgba(255,68,68,0.07)}
+.test-action-btn.play{border-color:var(--lime);color:var(--lime)}
+.test-action-btn.play:hover{background:rgba(184,255,87,0.07)}
+.test-action-btn:disabled{opacity:0.3;cursor:not-allowed}
+.test-waveform{height:36px;background:var(--card);border-radius:6px;overflow:hidden;position:relative;margin-top:8px;display:none}
+.waveform-canvas{width:100%;height:100%;display:block}
+.test-playback-bar{height:3px;background:var(--lime);width:0%;transition:width 0.1s;position:absolute;bottom:0;left:0;border-radius:2px}
+
+.gr-checklist{width:100%;max-width:540px;flex-shrink:0}
+.check-row{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--hint);padding:3px 0}
+.check-row svg{width:14px;height:14px;flex-shrink:0;color:var(--muted2);transition:color 0.2s}
+.check-row.ok{color:var(--text)}
+.check-row.ok svg{color:var(--green)}
+
+/* Green Room Right Panel */
+.gr-right{background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.gr-right-scroll{flex:1;overflow-y:auto}
+.gr-right-scroll::-webkit-scrollbar{width:3px}
+.gr-right-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.gr-sec{padding:12px 14px;border-bottom:1px solid var(--border)}
+.gr-sec:last-child{border-bottom:none}
+.gr-sec-title{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:2.5px;color:var(--label);text-transform:uppercase;margin-bottom:9px}
+.sel-g{margin-bottom:7px}
+.sel-g:last-child{margin-bottom:0}
+.sl{font-size:10px;color:var(--label);font-weight:600;margin-bottom:3px;letter-spacing:0.2px}
+select,input[type=text]{width:100%;padding:6px 22px 6px 8px;background:var(--card);border:1.5px solid var(--border);border-radius:7px;color:#ffffff !important;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:border-color 0.18s;-webkit-text-fill-color:#ffffff}
+select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='none' stroke='%234a6070' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;background-color:var(--card)}
+select:focus,input[type=text]:focus{outline:none;border-color:var(--lime-dim)}
+select option{background:#131920;color:#ffffff}
+input[type=text]::placeholder{color:#4a6070;-webkit-text-fill-color:#4a6070}
+.tgl-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
+.tgl-row:last-child{border-bottom:none;padding-bottom:0}
+.tgl-lbl{font-size:11.5px;color:var(--text)}
+.tgl{position:relative;width:28px;height:16px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0;position:absolute}
+.tgl-s{position:absolute;inset:0;background:var(--muted2);border-radius:8px;cursor:pointer;transition:background 0.18s}
+.tgl-s::before{content:'';position:absolute;width:10px;height:10px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform 0.18s}
+.tgl input:checked+.tgl-s{background:var(--lime)}
+.tgl input:checked+.tgl-s::before{transform:translateX(12px)}
+.gain-row{display:flex;align-items:center;gap:7px;margin-top:5px}
+.gain-row input[type=range]{flex:1;height:3px;background:var(--border2);border-radius:2px;appearance:none;-webkit-appearance:none;cursor:pointer;outline:none}
+.gain-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;background:var(--lime);border-radius:50%;cursor:pointer}
+.gain-v{font-size:10px;font-weight:700;color:var(--lime);min-width:26px;text-align:right}
+
+/* Banner inputs */
+.banner-input-wrap{position:relative;margin-bottom:4px}
+.banner-input-wrap input[type=text]{padding-right:38px;font-size:11px}
+.banner-speed-sel{position:absolute;right:2px;top:50%;transform:translateY(-50%);background:var(--card2);border:none;color:var(--muted);font-size:9px;font-weight:700;border-radius:4px;padding:3px 4px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.banner-prev{height:22px;border-radius:4px;overflow:hidden;margin-top:4px;display:none;background:#000;position:relative}
+.banner-prev-inner{position:absolute;inset:0;display:flex;align-items:center;overflow:hidden}
+.bprev-txt{white-space:nowrap;font-size:9px;font-weight:700;padding-left:100%;animation:bpAnim 7s linear infinite}
+@keyframes bpAnim{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+
+/* Headshot */
+.hs-row{display:flex;align-items:flex-start;gap:10px}
+.hs-photo{width:52px;height:52px;border-radius:50%;background:var(--card);border:2px dashed var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;transition:border-color 0.18s;position:relative}
+.hs-photo:hover{border-color:var(--lime-dim)}
+#hsPreview{width:100%;height:100%;object-fit:cover;display:none;border-radius:50%}
+.hs-photo svg{width:18px;height:18px;color:var(--muted);opacity:0.4}
+#hsFileInput{display:none}
+.hs-fields{flex:1;display:flex;flex-direction:column;gap:5px}
+
+/* Footer + Enter btn */
+.gr-footer{padding:12px 14px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
+.enter-btn{width:100%;padding:13px;border-radius:9px;border:none;background:var(--lime);color:#000;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:0.3px}
+.enter-btn:hover:not(:disabled){background:#ccff66;transform:translateY(-1px)}
+.enter-btn:disabled{opacity:0.32;cursor:not-allowed;transform:none}
+.enter-btn svg{width:14px;height:14px}
+.enter-note{font-size:10px;color:var(--hint);text-align:center;margin-top:5px;min-height:13px}
+
+/* ══════════════════════════════════════
+   RECORDING SCREEN
+══════════════════════════════════════ */
+#recScreen.active{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.rec-header{height:50px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;z-index:10}
+.rec-logo{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--lime);display:flex;align-items:center;gap:7px}
+.rec-lmark{width:22px;height:22px;background:var(--lime);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rec-lmark svg{width:11px;height:11px}
+.rec-nav{display:flex;background:var(--card);border-radius:7px;padding:3px;gap:2px;margin-left:8px}
+.rec-npill{padding:4px 12px;border-radius:5px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.18s}
+.rec-npill.on{background:var(--lime);color:#000}
+.rec-npill:hover:not(.on){color:var(--text)}
+.rec-hdr-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.status-chip{font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 9px;border-radius:20px;border:1px solid var(--border2);color:var(--muted);transition:all 0.25s}
+.status-chip.live{border-color:var(--lime);color:var(--lime)}
+.status-chip.rec-active{border-color:var(--red);color:var(--red);animation:chipBlink 1.4s infinite}
+.status-chip.paused-chip{border-color:var(--blue);color:var(--blue)}
+@keyframes chipBlink{0%,100%{opacity:1}50%{opacity:0.35}}
+.rec-back{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 12px;font-size:11px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.rec-back:hover{color:var(--text);border-color:var(--border2)}
+.rec-body{flex:1;display:flex;min-height:0;overflow:hidden}
+.rec-stage{flex:1;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px;position:relative;overflow:hidden}
+.rec-stage::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(184,255,87,0.028),transparent 65%);pointer-events:none}
+.canvas-outer{position:relative;transition:all 0.3s}
+.canvas-outer.land{width:min(100%,820px);aspect-ratio:16/9}
+.canvas-outer.port{width:min(100%,340px);aspect-ratio:9/16}
+.canvas-outer.sq{width:min(100%,520px);aspect-ratio:1/1}
+.canvas-outer.four5{width:min(100%,430px);aspect-ratio:4/5}
+#recCanvas{width:100%;height:100%;display:block;border-radius:12px;border:2px solid var(--border);transition:border-color 0.3s,box-shadow 0.3s}
+#recCanvas.live{border-color:var(--lime-dim);box-shadow:0 0 32px rgba(184,255,87,0.07)}
+#recCanvas.recording{border-color:var(--red);box-shadow:0 0 50px rgba(255,68,68,0.18)}
+#recCanvas.paused-rec{border-color:var(--blue)}
+.rec-badge{position:absolute;top:12px;left:12px;background:var(--red);color:#fff;font-size:9px;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:20px;display:none;align-items:center;gap:5px;z-index:10;pointer-events:none}
+.rec-rdot{width:5px;height:5px;background:#fff;border-radius:50%;animation:rPulse 1s infinite}
+@keyframes rPulse{0%,100%{opacity:1}50%{opacity:0.1}}
+.rec-timer{position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.75);color:var(--text);font-family:'Syne',sans-serif;font-size:17px;letter-spacing:1px;padding:3px 10px;border-radius:7px;display:none;z-index:10;pointer-events:none}
+.pause-badge{position:absolute;top:12px;left:12px;background:var(--blue);color:#fff;font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 10px;border-radius:20px;display:none;z-index:10;pointer-events:none}
+.mute-flag{position:absolute;bottom:12px;left:12px;background:rgba(255,68,68,0.88);color:#fff;font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;display:none;z-index:10;pointer-events:none}
+.cdown-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.86);display:none;align-items:center;justify-content:center;z-index:20;border-radius:12px}
+.cdown-num{font-family:'Syne',sans-serif;font-size:110px;font-weight:800;color:var(--lime);line-height:1}
+@keyframes cPop{0%{transform:scale(1.6);opacity:0}20%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:scale(0.4)}}
+.rec-sidebar{width:262px;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.rec-sidebar-scroll{flex:1;overflow-y:auto}
+.rec-sidebar-scroll::-webkit-scrollbar{width:3px}
+.rec-sidebar-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.rsb{padding:11px 13px;border-bottom:1px solid var(--border)}
+.rsb:last-child{border-bottom:none;flex:1}
+.rsbt{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:2.5px;color:var(--label);text-transform:uppercase;margin-bottom:8px}
+.rsel-g{margin-bottom:6px}
+.rsel-g:last-child{margin-bottom:0}
+.rsl{font-size:10px;color:var(--label);font-weight:600;margin-bottom:3px}
+.rsb select{width:100%;padding:6px 22px 6px 8px;background:var(--card);border:1.5px solid var(--border);border-radius:7px;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='none' stroke='%234a6070' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;background-color:var(--card);transition:border-color 0.18s}
+.rsb select:focus{outline:none;border-color:var(--lime-dim)}
+.rsb select option{background:#131920;color:#fff}
+.rsb select:disabled{opacity:0.35;cursor:not-allowed}
+.color-row{display:flex;align-items:center;gap:5px;margin-top:5px;flex-wrap:wrap}
+.cpd{width:20px;height:20px;border-radius:4px;border:2px solid transparent;cursor:pointer;transition:transform 0.14s;flex-shrink:0}
+.cpd:hover{transform:scale(1.18)}
+.cpd.active{border-color:#fff!important}
+.cpd-custom{display:flex;align-items:center;justify-content:center;background:var(--card);border:1.5px dashed var(--border2)!important}
+.cpd-custom svg{width:10px;height:10px;color:var(--muted)}
+#customColorInput{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+.rtgl-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
+.rtgl-row:last-child{border-bottom:none;padding-bottom:0}
+.rtgl-lbl{font-size:11.5px;color:var(--text)}
+.rbtn{width:100%;padding:9px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.18s;margin-bottom:5px}
+.rbtn:last-child{margin-bottom:0}
+.rbtn svg{width:12px;height:12px;flex-shrink:0}
+.rbtn-lime{background:var(--lime);color:#000}
+.rbtn-lime:hover:not(:disabled){background:#ccff66;transform:translateY(-1px)}
+.rbtn-red{background:var(--red);color:#fff}
+.rbtn-red:hover:not(:disabled){background:#ff6666}
+.rbtn-blue{background:var(--blue);color:#fff}
+.rbtn-ghost{background:var(--card);color:var(--text);border:1.5px solid var(--border)}
+.rbtn-ghost:hover:not(:disabled){border-color:var(--lime-dim)}
+.rbtn:disabled{opacity:0.3;cursor:not-allowed;transform:none!important}
+.rbtn-pair{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:5px}
+.rmeter-wrap{height:5px;background:var(--card);border-radius:3px;overflow:hidden;margin-top:4px}
+.rmeter-fill{height:100%;width:0%;border-radius:3px;background:linear-gradient(90deg,var(--lime) 0%,var(--amber) 70%,var(--red) 100%);transition:width 0.06s}
+.rmeter-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--hint);margin-top:2px}
+.rclip-card{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:7px;display:flex;align-items:center;gap:7px;animation:rcFade 0.25s ease;transition:border-color 0.18s;margin-bottom:4px}
+@keyframes rcFade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.rclip-card:hover{border-color:var(--border2)}
+.rct{width:46px;height:28px;background:#000;border-radius:4px;overflow:hidden;flex-shrink:0;border:1px solid var(--border2)}
+.rct video{width:100%;height:100%;object-fit:cover}
+.rci{flex:1;min-width:0}
+.rcn{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.rcm{font-size:10px;color:var(--hint);margin-top:1px}
+.rca{display:flex;gap:3px}
+.ricb{width:22px;height:22px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.14s;flex-shrink:0}
+.ricb svg{width:10px;height:10px}
+.ricb.dl:hover{background:rgba(61,214,140,0.08);color:#3dd68c;border-color:#3dd68c}
+.ricb.rm:hover{background:rgba(255,68,68,0.08);color:var(--red);border-color:var(--red)}
+.rempty{text-align:center;padding:14px 0;color:var(--hint);font-size:11px}
+.rec-status-bar{height:24px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 13px;gap:6px;flex-shrink:0}
+.rsdot{width:6px;height:6px;border-radius:50%;background:var(--muted2);transition:background 0.25s;flex-shrink:0}
+.rsdot.ok{background:#3dd68c}
+.rsdot.rec{background:var(--red)}
+.rsdot.warn{background:var(--amber)}
+.rstxt{font-size:10px;color:var(--hint)}
+
+/* ── SOUNDBOARD ── */
+.sb-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:6px}
+.sb-pad{
+  background:var(--card);border:1.5px solid var(--border);border-radius:8px;
+  padding:9px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;
+  gap:4px;transition:all 0.15s;position:relative;overflow:hidden;min-height:62px;
+}
+.sb-pad:hover{border-color:var(--border2);transform:translateY(-1px)}
+.sb-pad.playing{border-color:var(--lime);background:var(--lime-glow);animation:padPulse 0.8s ease-in-out infinite alternate}
+.sb-pad.custom-empty{border-style:dashed;opacity:0.55}
+.sb-pad.custom-empty:hover{opacity:1;border-color:var(--lime-dim)}
+@keyframes padPulse{from{box-shadow:0 0 0 0 rgba(184,255,87,0.3)}to{box-shadow:0 0 0 6px rgba(184,255,87,0)}}
+.sb-pad-icon{font-size:22px;line-height:1}
+.sb-pad-name{font-size:9px;font-weight:700;color:var(--label);text-align:center;letter-spacing:0.2px;line-height:1.2}
+.sb-pad.playing .sb-pad-name{color:var(--lime)}
+.sb-pad-vol{
+  position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--lime);transform:scaleX(1);transform-origin:left;
+  display:none;
+}
+.sb-pad.playing .sb-pad-vol{display:block;animation:volBar 0.4s ease forwards}
+@keyframes volBar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.sb-custom-label{font-size:9px;color:var(--label);font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;margin-top:2px}
+.sb-master{display:flex;align-items:center;gap:6px;margin-top:6px}
+.sb-master-lbl{font-size:10px;color:var(--label);font-weight:600;white-space:nowrap}
+.sb-master input[type=range]{flex:1;height:3px;background:var(--border2);border-radius:2px;appearance:none;-webkit-appearance:none;cursor:pointer;outline:none}
+.sb-master input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;background:var(--lime);border-radius:50%;cursor:pointer}
+.sb-master-val{font-size:10px;font-weight:700;color:var(--lime);min-width:28px;text-align:right}
+.sb-baked-note{font-size:9px;color:var(--lime);margin-top:4px;opacity:0.7}
+
+/* Soundboard accordion header */
+.sb-accord{padding:11px 13px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background 0.15s;user-select:none}
+.sb-accord:hover{background:rgba(255,255,255,0.015)}
+.sb-accord-title{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:2.5px;color:var(--label);text-transform:uppercase}
+.sb-accord-arrow{color:var(--label);transition:transform 0.2s;font-size:10px}
+.sb-accord-arrow.open{transform:rotate(180deg)}
+.sb-accord-body{display:none;padding:11px 13px;border-bottom:1px solid var(--border)}
+.sb-accord-body.open{display:block}
+
+/* File input for soundboard */
+.sb-file-input{display:none}
+
+/* Soundboard recording indicator */
+#sbRecIndicator{display:none;font-size:9px;color:var(--lime);font-weight:700;letter-spacing:1px;margin-top:4px;text-align:center}
+#sbRecIndicator.active{display:block}
+#recSplash.show{display:flex}
+.rsplash-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--lime)}
+.rsplash-bar{width:180px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.rsplash-fill{height:100%;background:var(--lime);border-radius:2px;animation:sfill 0.7s ease forwards}
+@keyframes sfill{from{width:0}to{width:100%}}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- ════════════════════════════════════
+     LANDING PAGE
+════════════════════════════════════ -->
+<div id="landing" class="page active">
+  <nav class="land-nav">
+    <div class="land-logo">
+      <div class="lmark"><svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3" fill="#000" stroke="none"/></svg></div>
+      SYMPL STUDIO
+    </div>
+    <div class="land-nav-r">
+      <span class="land-badge">Browser-based · No install</span>
+      <button class="nav-cta" onclick="goGreenRoom()">Launch Free →</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-eyebrow">Personal Video Recorder</div>
+    <h1 class="hero-title">SYMPL<br><span>STUDIO</span></h1>
+    <div class="hero-sub">Creator Edition</div>
+    <p class="hero-tagline">
+      <strong>Go live. Look pro. Keep it sympl.</strong><br>
+      Broadcast-quality recording with live tickers, branded frames &amp; animated chyrons — right in your browser.
+    </p>
+    <button class="hero-cta" onclick="goGreenRoom()">
+      Start Recording Free
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+
+    <!-- Product preview mock -->
+    <div class="hero-mock">
+      <div class="mock-bar">
+        <div class="mdot" style="background:#ff5f57"></div>
+        <div class="mdot" style="background:#ffbd2e;margin-left:4px"></div>
+        <div class="mdot" style="background:#28c840;margin-left:4px"></div>
+        <span class="mock-label">SYMPL STUDIO — RECORDING</span>
+      </div>
+      <div class="ticker-band">
+        <div class="tick-run" style="color:var(--lime)">
+          &nbsp;LIVE BROADCAST &nbsp;●&nbsp; SYMPL STUDIO &nbsp;●&nbsp; STREAM WITH CONFIDENCE &nbsp;●&nbsp; BRANDED FRAMES &nbsp;●&nbsp; ANIMATED CHYRONS &nbsp;●&nbsp; ONE-CLICK EXPORT &nbsp;●&nbsp;
+          LIVE BROADCAST &nbsp;●&nbsp; SYMPL STUDIO &nbsp;●&nbsp; STREAM WITH CONFIDENCE &nbsp;●&nbsp; BRANDED FRAMES &nbsp;●&nbsp; ANIMATED CHYRONS &nbsp;●&nbsp; ONE-CLICK EXPORT &nbsp;●&nbsp;
+        </div>
+      </div>
+      <div class="mock-main">
+        <div class="mock-frame"></div>
+        <div class="mock-avatar"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg></div>
+        <div class="mock-rec"><div class="rdot"></div>REC</div>
+        <div class="mock-time">0:42</div>
+        <div class="mock-chyron">
+          <div class="chyr-accent"></div>
+          <div class="chyr-photo"></div>
+          <div class="chyr-text"><div class="chyr-name">Your Name Here</div><div class="chyr-role">Creator · Host · Educator</div></div>
+          <div style="width:8px"></div>
+        </div>
+        <div class="mock-btick">
+          <div class="tick-run rev" style="color:var(--cyan)">
+            &nbsp;SUBSCRIBE FOR MORE &nbsp;●&nbsp; LINK IN BIO &nbsp;●&nbsp; NEW EPISODE EVERY TUESDAY &nbsp;●&nbsp; FOLLOW FOR UPDATES &nbsp;●&nbsp;
+            SUBSCRIBE FOR MORE &nbsp;●&nbsp; LINK IN BIO &nbsp;●&nbsp; NEW EPISODE EVERY TUESDAY &nbsp;●&nbsp; FOLLOW FOR UPDATES &nbsp;●&nbsp;
+          </div>
+        </div>
+      </div>
+      <div class="ticker-band" style="border-top:1px solid rgba(255,255,255,0.04)">
+        <div class="tick-run rev" style="color:var(--cyan)">
+          &nbsp;RECORD · EDIT · EXPORT &nbsp;●&nbsp; NO DOWNLOADS REQUIRED &nbsp;●&nbsp; PROFESSIONAL QUALITY IN YOUR BROWSER &nbsp;●&nbsp;
+          RECORD · EDIT · EXPORT &nbsp;●&nbsp; NO DOWNLOADS REQUIRED &nbsp;●&nbsp; PROFESSIONAL QUALITY IN YOUR BROWSER &nbsp;●&nbsp;
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features-wrap">
+    <div class="feat-eyebrow">Everything you need</div>
+    <h2 class="feat-title">Built for <span style="color:var(--lime)">creators</span> who mean business</h2>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></div>
+        <div class="feat-name">Live Tickers</div>
+        <div class="feat-desc">Broadcast-style scrolling banners — top and bottom. Set your text once before going live. Both baked directly into your recording.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><rect x="6" y="6" width="12" height="12" rx="1"/></svg></div>
+        <div class="feat-name">Branded Frames</div>
+        <div class="feat-desc">News, podcast, cinematic or creator borders. Four styles, three thicknesses, any color. All composited live onto your camera feed.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+        <div class="feat-name">Headshot Chyron</div>
+        <div class="feat-desc">Upload your photo, type your name and title. An animated lower-third slides in and expands into a running banner across the screen.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg></div>
+        <div class="feat-name">Green Room Setup</div>
+        <div class="feat-desc">Test your mic before going live. Preview your camera. Set banners, frames and overlays — so the recording screen is clean and distraction-free.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOTTOM CTA -->
+  <section class="cta-band">
+    <h2>Ready to look like a <span style="color:var(--lime)">pro?</span></h2>
+    <p>No account. No download. Open your browser and record.</p>
+    <button class="hero-cta" onclick="goGreenRoom()">
+      Open Sympl Studio
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </section>
+
+  <footer class="land-footer">
+    <div class="footer-logo">
+      <div class="lmark" style="width:22px;height:22px;border-radius:5px"><svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" style="width:11px;height:11px"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3" fill="#000" stroke="none"/></svg></div>
+      SYMPL STUDIO
+    </div>
+    <div>Personal Video Recorder · Browser-based · No install required</div>
+  </footer>
+</div>
+
+
+<!-- ════════════════════════════════════
+     GREEN ROOM
+════════════════════════════════════ -->
+<div id="greenRoom" class="page">
+  <div class="gr-header">
+    <div class="gr-logo">
+      <div class="gr-lmark"><svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3" fill="#000" stroke="none"/></svg></div>
+      SYMPL STUDIO
+    </div>
+    <span class="gr-page-label">Green Room</span>
+    <button class="back-btn" onclick="goLanding()">← Back</button>
+  </div>
+
+  <div class="gr-body">
+
+    <!-- ── LEFT COLUMN ── -->
+    <div class="gr-left">
+
+      <!-- Camera Preview -->
+      <div class="gr-cam-outer">
+        <div class="gr-cam-label">
+          <div class="cam-status-dot" id="camDot"></div>
+          Camera Preview
+        </div>
+        <div class="gr-cam-box" id="grCamBox">
+          <div class="gr-placeholder" id="grPlaceholder">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M15 10l4.553-2.069A1 1 0 0121 8.868v6.264a1 1 0 01-1.447.899L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+            <p>Click the button below to connect your camera and mic</p>
+            <button class="gr-connect-btn" onclick="connectDevices()">Connect Camera &amp; Mic</button>
+          </div>
+          <video id="grVid" autoplay muted playsinline></video>
+        </div>
+      </div>
+
+      <!-- Mic Level -->
+      <div class="gr-mic-outer">
+        <div class="gr-mic-row">
+          <div class="gr-mic-label">
+            <div class="mic-status-dot" id="micDot"></div>
+            Microphone Level
+          </div>
+        </div>
+        <div class="meter-wrap"><div class="meter-fill" id="grMeter"></div></div>
+        <div class="meter-labels"><span>Silent</span><span>Good</span><span>Too Loud</span></div>
+      </div>
+
+      <!-- Mic Test Recorder -->
+      <div class="mic-test-wrap">
+        <div class="mic-test-hdr">
+          <span class="mic-test-title">Mic Test — Hear Yourself Back</span>
+        </div>
+        <div class="mic-test-btns">
+          <button class="test-action-btn record" id="testRecBtn" onclick="startMicTest()" disabled>
+            <svg fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg>
+            Record 5 sec
+          </button>
+          <button class="test-action-btn play" id="testPlayBtn" onclick="playMicTest()" disabled>
+            <svg fill="currentColor" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+            Play Back
+          </button>
+          <button class="test-action-btn" id="testRetryBtn" onclick="retryMicTest()" disabled style="display:none">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg>
+            Retry
+          </button>
+        </div>
+        <div class="mic-test-status" id="testStatus">Connect your mic first to enable the test</div>
+        <div class="test-waveform" id="testWaveformWrap">
+          <canvas class="waveform-canvas" id="waveCanvas"></canvas>
+          <div class="test-playback-bar" id="playbackBar"></div>
+        </div>
+      </div>
+
+      <!-- Setup checklist -->
+      <div class="gr-checklist">
+        <div class="check-row" id="chk-cam">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+          Camera connected
+        </div>
+        <div class="check-row" id="chk-mic">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+          Microphone active
+        </div>
+        <div class="check-row" id="chk-test">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+          Mic test completed
+        </div>
+        <div class="check-row" id="chk-banner">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+          Banners configured (optional)
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── RIGHT PANEL ── -->
+    <div class="gr-right">
+      <div class="gr-right-scroll">
+
+        <!-- Devices -->
+        <div class="gr-sec">
+          <div class="gr-sec-title">Camera &amp; Microphone</div>
+          <div class="sel-g">
+            <div class="sl">Camera</div>
+            <select id="camSel" onchange="onDeviceChange()"><option value="">— Select after connecting —</option></select>
+          </div>
+          <div class="sel-g">
+            <div class="sl">Microphone</div>
+            <select id="micSel" onchange="onDeviceChange()"><option value="">— Select after connecting —</option></select>
+          </div>
+        </div>
+
+        <!-- Recording Settings -->
+        <div class="gr-sec">
+          <div class="gr-sec-title">Recording Settings</div>
+          <div class="sel-g">
+            <div class="sl">Quality</div>
+            <select id="qualSel">
+              <option value="720p">720p HD</option>
+              <option value="1080p" selected>1080p Full HD</option>
+              <option value="2k">2K</option>
+              <option value="4k">4K Ultra HD</option>
+            </select>
+          </div>
+          <div class="sel-g">
+            <div class="sl">Platform Preset</div>
+            <select id="platSel" onchange="onPlatformChange()">
+              <option value="yt">YouTube — 16:9</option>
+              <option value="tk">TikTok — 9:16</option>
+              <option value="ig">Instagram Reels — 9:16</option>
+              <option value="ig4x5">Instagram Feed — 4:5</option>
+              <option value="igsq">Instagram Square — 1:1</option>
+              <option value="tw">X / Twitter — 16:9</option>
+              <option value="li">LinkedIn — 16:9</option>
+              <option value="ytsh">YouTube Shorts — 9:16</option>
+            </select>
+          </div>
+          <div class="sel-g">
+            <div class="sl">Countdown Before Recording</div>
+            <select id="cdownSel">
+              <option value="0">No countdown</option>
+              <option value="3" selected>3 seconds</option>
+              <option value="5">5 seconds</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Camera Options -->
+        <div class="gr-sec">
+          <div class="gr-sec-title">Camera Options</div>
+          <div class="tgl-row">
+            <span class="tgl-lbl">Flip / Mirror Image</span>
+            <label class="tgl"><input type="checkbox" id="mirrorTgl" onchange="toggleMirror()"><span class="tgl-s"></span></label>
+          </div>
+          <div class="tgl-row">
+            <span class="tgl-lbl">Vertical Mode (9:16)</span>
+            <label class="tgl"><input type="checkbox" id="portTgl" onchange="onPortChange()"><span class="tgl-s"></span></label>
+          </div>
+        </div>
+
+        <!-- Audio Processing -->
+        <div class="gr-sec">
+          <div class="gr-sec-title">Audio Processing</div>
+          <div style="font-size:10px;color:var(--hint);margin-bottom:7px;line-height:1.55">Tip: Enable one at a time to avoid audio issues.</div>
+          <div class="tgl-row">
+            <span class="tgl-lbl">Remove Background Noise</span>
+            <label class="tgl"><input type="checkbox" id="noiseTgl"><span class="tgl-s"></span></label>
+          </div>
+          <div class="tgl-row">
+            <span class="tgl-lbl">Remove Echo</span>
+            <label class="tgl"><input type="checkbox" id="echoTgl"><span class="tgl-s"></span></label>
+          </div>
+          <div class="tgl-row">
+            <span class="tgl-lbl">Auto Volume Level</span>
+            <label class="tgl"><input type="checkbox" id="gainTgl"><span class="tgl-s"></span></label>
+          </div>
+          <div class="sl" style="margin-top:8px">Mic Boost (if too quiet)</div>
+          <div class="gain-row">
+            <input type="range" id="gainSlider" min="1" max="4" step="0.1" value="1" oninput="document.getElementById('gainV').textContent=parseFloat(this.value).toFixed(1)+'x'">
+            <span class="gain-v" id="gainV">1.0x</span>
+          </div>
+        </div>
+
+        <!-- Top Ticker Banner -->
+        <div class="gr-sec">
+          <div class="gr-sec-title">Top Ticker Banner</div>
+          <div style="font-size:10px;color:var(--hint);margin-bottom:7px;line-height:1.55">Scrolls right → left across the top of your recording.</div>
+          <div class="tgl-row" style="margin-bottom:7px">
+            <span class="tgl-lbl">Enable Top Ticker</span>
+            <label class="tgl"><input type="checkbox" id="topTickerEnable" onchange="updateBannerPreview('top')"><span class="tgl-s"></span></label>
+          </div>
+          <div class="sl">Ticker Text</div>
+          <div class="banner-input-wrap">
+            <input type="text" id="topTickerText" placeholder="e.g. LIVE NOW · Subscribe for more · New episode every Tuesday" oninput="updateBannerPreview('top')">
+          </div>
+          <div class="sel-g" style="margin-top:6px">
+            <div class="sl">Scroll Speed</div>
+            <select id="topTickerSpeed">
+              <option value="slow">Slow</option>
+              <option value="medium" selected>Medium</option>
+              <option value="fast">Fast</option>
+            </select>
+          </div>
+          <div class="sl" style="margin-top:6px">Text Color</div>
+          <div style="display:flex;gap:5px;margin-bottom:6px">
+            <div class="cp-dot on" data-color="#b8ff57" style="width:20px;height:20px;border-radius:4px;background:#b8ff57;border:2px solid #fff;cursor:pointer;flex-shrink:0" onclick="setTickerColor('top','#b8ff57',this)"></div>
+            <div class="cp-dot" data-color="#ffffff" style="width:20px;height:20px;border-radius:4px;background:#fff;border:2px solid transparent;cursor:pointer;flex-shrink:0" onclick="setTickerColor('top','#ffffff',this)"></div>
+            <div class="cp-dot" data-color="#22d3ee" style="width:20px;height:20px;border-radius:4px;background:#22d3ee;border:2px solid transparent;cursor:pointer;flex-shrink:0" onclick="setTickerColor('top','#22d3ee',this)"></div>
+            <div class="cp-dot" data-color="#ffb347" style="width:20px;height:20px;border-radius:4px;background:#ffb347;border:2px solid transparent;cursor:pointer;flex-shrink:0" onclick="setTickerColor('top','#ffb347',this)"></div>
+            <div class="cp-dot" data-color="#ff4444" style="width:20px;height:20px;border-radius:4px;background:#ff4444;border:2px solid transparent;cursor:pointer;flex-shrink:0" onclick="setTickerColor('top','#ff4444',this)"></div>
+          </div>
+          <div class="banner-prev" id="topBannerPrev">
+            <div class="banner-prev-inner"><div class="bprev-txt" id="topBannerPrevTxt"></div></div>
+          </div>
+        </div>
+
+        <!-- Bottom Ticker Banner -->
+        <div class="gr-sec">
+          <div class="gr-sec-title">Bottom Ticker Banner</div>
+          <div style="font-size:10px;color:var(--hint);margin-bottom:7px;line-height:1.55">Scrolls left → right across the bottom of your recording.</div>
+          <div class="tgl-row" style="margin-bottom:7px">
+            <span class="tgl-lbl">Enable Bottom Ticker</span>
+            <label class="tgl"><input type="checkbox" id="botTickerEnable" onchange="updateBannerPreview('bot')"><span class="tgl-s"></span></label>
+          </div>
+          <div class="sl">Ticker Text</div>
+          <div class="banner-input-wrap">
+            <input type="text" id="botTickerText" placeholder="e.g. Follow · Link in bio · Comment ❤️ if helpful" oninput="updateBannerPreview('bot')">
+          </div>
+          <div class="sel-g" style="margin-top:6px">
+            <div class="sl">Scroll Speed</div>
+            <select id="botTickerSpeed">
+              <option value="slow">Slow</option>
+              <option value="medium" selected>Medium</option>
+              <option value="fast">Fast</option>
+            </select>
+          </div>
+          <div class="sl" style="margin-top:6px">Text Color</div>
+          <div style="display:flex;gap:5px;margin-bottom:6px">
+            <div class="cp-dot" data-color="#22d3ee" style="width:20px;height:20px;border-radius:4px;background:#22d3ee;border:2px solid #fff;cursor:pointer;flex-shrink:0" onclick="setTickerColor('bot','#22d3ee',this)"></div>
+            <div class="cp-dot" data-color="#b8ff57" style="width:20px;height:20px;border-radius:4px;background:#b8ff57;border:2px solid transparent;cursor:pointer;flex-shrink:0" onclick="setTickerColor('bot','#b8ff57',this)"></div>
+            <div class="cp-dot" data-color="#ffffff" style="width:20px;height:20px;border-radius:4px;background:#fff;border:2px solid transparent;cursor:pointer;flex-shrink:0" onclick="setTickerColor('bot','#ffffff',this)"></div>
+            <div class="cp-dot" data-color="#ffb347" style="width:20px;height:20px;border-radius:4px;background:#ffb347;border:2px solid transparent;cursor:pointer;flex-shrink:0" onclick="setTickerColor('bot','#ffb347',this)"></div>
+            <div class="cp-dot" data-color="#ff4444" style="width:20px;height:20px;border-radius:4px;background:#ff4444;border:2px solid transparent;cursor:pointer;flex-shrink:0" onclick="setTickerColor('bot','#ff4444',this)"></div>
+          </div>
+          <div class="banner-prev" id="botBannerPrev">
+            <div class="banner-prev-inner"><div class="bprev-txt" id="botBannerPrevTxt" style="animation-direction:reverse"></div></div>
+          </div>
+        </div>
+
+        <!-- Headshot Chyron -->
+        <div class="gr-sec">
+          <div class="gr-sec-title">Headshot Chyron</div>
+          <div style="font-size:10px;color:var(--hint);margin-bottom:8px;line-height:1.55">Animated lower-third that slides in from the left. Baked into your recording.</div>
+          <div class="tgl-row" style="margin-bottom:9px">
+            <span class="tgl-lbl">Enable Chyron</span>
+            <label class="tgl"><input type="checkbox" id="chyronEnable"><span class="tgl-s"></span></label>
+          </div>
+          <div class="hs-row">
+            <div class="hs-photo" onclick="document.getElementById('hsFileInput').click()" title="Upload headshot">
+              <img id="hsPreview" src="" alt="">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            </div>
+            <input type="file" id="hsFileInput" accept="image/*" onchange="loadHeadshot(this)">
+            <div class="hs-fields">
+              <div>
+                <div class="sl">Your Name</div>
+                <input type="text" id="chyronName" placeholder="e.g. Alex Johnson">
+              </div>
+              <div>
+                <div class="sl">Title / Role</div>
+                <input type="text" id="chyronRole" placeholder="e.g. Host · Creator · Educator">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end scroll -->
+
+      <!-- Enter Studio Footer -->
+      <div class="gr-footer">
+        <button class="enter-btn" id="enterBtn" onclick="enterStudio()" disabled>
+          Enter Studio
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <div class="enter-note" id="enterNote">Connect your camera &amp; mic to continue</div>
+      </div>
+    </div><!-- end right -->
+
+  </div><!-- end gr-body -->
+</div>
+
+
+<!-- ════════════════════════════════════
+     RECORDING SCREEN
+════════════════════════════════════ -->
+<div id="recScreen" class="page">
+  <input type="color" id="customColorInput" onchange="applyCustomFrameColor(this.value)">
+
+  <!-- Splash for editor transition -->
+  <div id="recSplash">
+    <div class="rsplash-title">SYMPL STUDIO</div>
+    <div class="rsplash-bar"><div class="rsplash-fill"></div></div>
+  </div>
+
+  <!-- Header -->
+  <div class="rec-header">
+    <div class="rec-logo">
+      <div class="rec-lmark"><svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3" fill="#000" stroke="none"/></svg></div>
+      SYMPL STUDIO
+    </div>
+    <div class="rec-nav">
+      <button class="rec-npill on" id="rnRec">⏺ Record</button>
+      <button class="rec-npill" id="rnEdit" onclick="goToEditor()" disabled>✂ Edit</button>
+    </div>
+    <div class="rec-hdr-r">
+      <span class="status-chip" id="recChip">READY</span>
+      <button class="rec-back" onclick="goGreenRoomFromRec()">⚙ Settings</button>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="rec-body">
+
+    <!-- Stage -->
+    <div class="rec-stage">
+      <div class="canvas-outer land" id="canvasOuter">
+        <canvas id="recCanvas"></canvas>
+        <div class="rec-badge" id="recBadge"><div class="rec-rdot"></div>REC</div>
+        <div class="pause-badge" id="pauseBadge">⏸ PAUSED</div>
+        <div class="rec-timer" id="recTimer">00:00</div>
+        <div class="mute-flag" id="muteFlag">🔇 Muted</div>
+        <div class="cdown-overlay" id="cdownOv">
+          <div class="cdown-num" id="cdownN">3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="rec-sidebar">
+      <div class="rec-sidebar-scroll">
+
+        <!-- Frame & Borders -->
+        <div class="rsb">
+          <div class="rsbt">Frame &amp; Borders</div>
+          <div class="rsel-g">
+            <div class="rsl">Style</div>
+            <select id="frameStyle" onchange="onFrameChange()">
+              <option value="none">None</option>
+              <option value="news">News — Red + Corner Marks</option>
+              <option value="podcast">Podcast — Gold Luxury</option>
+              <option value="cinematic">Cinematic — Letterbox</option>
+              <option value="creator">Creator — Neon Gradient</option>
+            </select>
+          </div>
+          <div class="rsel-g" id="frameThickGroup">
+            <div class="rsl">Thickness</div>
+            <select id="frameThick" onchange="onFrameChange()">
+              <option value="4">Thin — 4px</option>
+              <option value="12" selected>Medium — 12px</option>
+              <option value="24">Thick — 24px</option>
+            </select>
+          </div>
+          <div id="frameColorGroup">
+            <div class="rsl" style="margin-top:6px">Border Color</div>
+            <div class="color-row" id="frameColorRow">
+              <div class="cpd active" style="background:#b8ff57" data-color="#b8ff57" onclick="setFrameColor('#b8ff57',this)"></div>
+              <div class="cpd" style="background:#ff4444" data-color="#ff4444" onclick="setFrameColor('#ff4444',this)"></div>
+              <div class="cpd" style="background:#f5c842" data-color="#f5c842" onclick="setFrameColor('#f5c842',this)"></div>
+              <div class="cpd" style="background:#ffffff" data-color="#ffffff" onclick="setFrameColor('#ffffff',this)"></div>
+              <div class="cpd" style="background:#4d9fff" data-color="#4d9fff" onclick="setFrameColor('#4d9fff',this)"></div>
+              <div class="cpd" style="background:#aa44ff" data-color="#aa44ff" onclick="setFrameColor('#aa44ff',this)"></div>
+              <div class="cpd cpd-custom" onclick="document.getElementById('customColorInput').click()" title="Custom color">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audio -->
+        <div class="rsb">
+          <div class="rsbt">Microphone</div>
+          <div class="rtgl-row">
+            <span class="rtgl-lbl">Remove Background Noise</span>
+            <label class="tgl"><input type="checkbox" id="rNoiseTgl"><span class="tgl-s"></span></label>
+          </div>
+          <div class="rtgl-row">
+            <span class="rtgl-lbl">Remove Echo</span>
+            <label class="tgl"><input type="checkbox" id="rEchoTgl"><span class="tgl-s"></span></label>
+          </div>
+          <div class="rtgl-row">
+            <span class="rtgl-lbl">Auto Volume</span>
+            <label class="tgl"><input type="checkbox" id="rGainTgl"><span class="tgl-s"></span></label>
+          </div>
+          <div class="rsl" style="margin-top:7px">Live Mic Level</div>
+          <div class="rmeter-wrap"><div class="rmeter-fill" id="recMeter"></div></div>
+          <div class="rmeter-labels"><span>Silent</span><span>Good</span><span>Loud</span></div>
+        </div>
+
+        <!-- Recording Controls -->
+        <div class="rsb">
+          <div class="rsbt">Recording Controls</div>
+          <button class="rbtn rbtn-lime" id="startBtn" onclick="startRecording()">
+            <svg fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg>Start Recording
+          </button>
+          <div class="rbtn-pair">
+            <button class="rbtn rbtn-blue" id="pauseBtn" onclick="togglePauseRec()" disabled>⏸ Pause</button>
+            <button class="rbtn rbtn-red" id="stopBtn" onclick="stopRecording()" disabled>
+              <svg fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>Stop
+            </button>
+          </div>
+          <button class="rbtn rbtn-ghost" id="muteBtn" onclick="toggleMuteRec()" disabled>🎤 Mute Mic</button>
+        </div>
+
+        <!-- Soundboard -->
+        <input type="file" class="sb-file-input" id="sbFile0" accept="audio/*" onchange="loadCustomSound(0,this)">
+        <input type="file" class="sb-file-input" id="sbFile1" accept="audio/*" onchange="loadCustomSound(1,this)">
+        <input type="file" class="sb-file-input" id="sbFile2" accept="audio/*" onchange="loadCustomSound(2,this)">
+
+        <div class="sb-accord" onclick="toggleSoundboard()">
+          <span class="sb-accord-title">🎛 Soundboard</span>
+          <span class="sb-accord-arrow open" id="sbArrow">▼</span>
+        </div>
+        <div class="sb-accord-body open" id="sbBody">
+
+          <!-- 6 Built-in pads -->
+          <div class="sb-grid" id="sbBuiltinGrid">
+            <div class="sb-pad" id="sbp-0" onclick="triggerPad(0)">
+              <span class="sb-pad-icon">🎙️</span>
+              <span class="sb-pad-name">Intro Sting</span>
+              <div class="sb-pad-vol"></div>
+            </div>
+            <div class="sb-pad" id="sbp-1" onclick="triggerPad(1)">
+              <span class="sb-pad-icon">👏</span>
+              <span class="sb-pad-name">Applause</span>
+              <div class="sb-pad-vol"></div>
+            </div>
+            <div class="sb-pad" id="sbp-2" onclick="triggerPad(2)">
+              <span class="sb-pad-icon">📯</span>
+              <span class="sb-pad-name">Air Horn</span>
+              <div class="sb-pad-vol"></div>
+            </div>
+            <div class="sb-pad" id="sbp-3" onclick="triggerPad(3)">
+              <span class="sb-pad-icon">🥁</span>
+              <span class="sb-pad-name">Rimshot</span>
+              <div class="sb-pad-vol"></div>
+            </div>
+            <div class="sb-pad" id="sbp-4" onclick="triggerPad(4)">
+              <span class="sb-pad-icon">🎉</span>
+              <span class="sb-pad-name">Fanfare</span>
+              <div class="sb-pad-vol"></div>
+            </div>
+            <div class="sb-pad" id="sbp-5" onclick="triggerPad(5)">
+              <span class="sb-pad-icon">⚡</span>
+              <span class="sb-pad-name">Alert</span>
+              <div class="sb-pad-vol"></div>
+            </div>
+          </div>
+
+          <!-- 3 Custom upload pads -->
+          <div class="sb-custom-label">Custom Sounds</div>
+          <div class="sb-grid">
+            <div class="sb-pad custom-empty" id="sbp-c0" onclick="sbCustomClick(0)">
+              <span class="sb-pad-icon">➕</span>
+              <span class="sb-pad-name" id="sbcn-0">Upload</span>
+              <div class="sb-pad-vol"></div>
+            </div>
+            <div class="sb-pad custom-empty" id="sbp-c1" onclick="sbCustomClick(1)">
+              <span class="sb-pad-icon">➕</span>
+              <span class="sb-pad-name" id="sbcn-1">Upload</span>
+              <div class="sb-pad-vol"></div>
+            </div>
+            <div class="sb-pad custom-empty" id="sbp-c2" onclick="sbCustomClick(2)">
+              <span class="sb-pad-icon">➕</span>
+              <span class="sb-pad-name" id="sbcn-2">Upload</span>
+              <div class="sb-pad-vol"></div>
+            </div>
+          </div>
+
+          <!-- Master volume -->
+          <div class="sb-master">
+            <span class="sb-master-lbl">Volume</span>
+            <input type="range" id="sbMasterVol" min="0" max="100" value="80" oninput="setSbMasterVol(this.value)">
+            <span class="sb-master-val" id="sbMasterVolVal">80%</span>
+          </div>
+          <div id="sbRecIndicator">🔴 BAKED INTO RECORDING</div>
+        </div>
+
+        <!-- Clips -->
+        <div class="rsb">
+          <div class="rsbt">Your Clips</div>
+          <div id="recClipList">
+            <div class="rempty" id="recEmptyMsg">
+              <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="width:20px;height:20px;opacity:0.18;display:block;margin:0 auto 5px"><path d="M15 10l4.553-2.069A1 1 0 0121 8.868v6.264a1 1 0 01-1.447.899L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+              Nothing recorded yet
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end scroll -->
+
+      <!-- Status bar -->
+      <div class="rec-status-bar">
+        <div class="rsdot" id="rsDot"></div>
+        <span class="rstxt" id="rsTxt">Ready</span>
+      </div>
+    </div>
+
+  </div><!-- end rec-body -->
+</div>
+
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────
+let prevStream = null;
+let micStream = null;
+let meterAC = null, meterAnalyser = null, meterRAF = null;
+let testRecorder = null, testChunks = [], testAudioURL = null, testAudio = null;
+let testRecording = false;
+let testCountdownInt = null;
+let camConnected = false;
+let micConnected = false;
+let micTestDone = false;
+let topTickerColor = '#b8ff57';
+let botTickerColor = '#22d3ee';
+let wavePoints = [];
+
+// ─── PAGE ROUTING ────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goLanding() {
+  stopAllStreams();
+  showPage('landing');
+  // Scroll to top of landing
+  window.scrollTo(0, 0);
+}
+
+function goGreenRoom() {
+  showPage('greenRoom');
+  updateCamAspectRatio();
+  // Try to auto-enumerate devices if already granted
+  navigator.mediaDevices.enumerateDevices()
+    .then(devs => { if (devs.some(d => d.label)) autoPopulateDevices(devs); })
+    .catch(() => {});
+}
+
+function goBack() {
+  showPage('greenRoom');
+}
+
+// ─── DEVICES ────────────────────────────────────────────────
+async function connectDevices() {
+  const placeholder = document.getElementById('grPlaceholder');
+  placeholder.querySelector('p').textContent = 'Requesting access...';
+  placeholder.querySelector('.gr-connect-btn').disabled = true;
+  try {
+    const tmp = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    tmp.getTracks().forEach(t => t.stop());
+    const devs = await navigator.mediaDevices.enumerateDevices();
+    populateDeviceSelects(devs);
+    await startPreview();
+  } catch(e) {
+    placeholder.querySelector('p').innerHTML = '<span style="color:var(--red)">Permission denied. Allow camera &amp; mic in browser settings and try again.</span>';
+    placeholder.querySelector('.gr-connect-btn').disabled = false;
+    placeholder.querySelector('.gr-connect-btn').textContent = 'Try Again';
+  }
+}
+
+function populateDeviceSelects(devs) {
+  const cs = document.getElementById('camSel');
+  const ms = document.getElementById('micSel');
+  cs.innerHTML = ''; ms.innerHTML = '';
+  let ci = 0, mi = 0;
+  devs.forEach(d => {
+    const o = document.createElement('option');
+    o.value = d.deviceId;
+    if (d.kind === 'videoinput') { o.text = d.label || `Camera ${++ci}`; cs.appendChild(o); }
+    else if (d.kind === 'audioinput') { o.text = d.label || `Microphone ${++mi}`; ms.appendChild(o); }
+  });
+  if (!cs.options.length) cs.innerHTML = '<option value="">No camera found</option>';
+  if (!ms.options.length) ms.innerHTML = '<option value="">No microphone found</option>';
+}
+
+function autoPopulateDevices(devs) {
+  populateDeviceSelects(devs);
+  startPreview();
+}
+
+async function onDeviceChange() {
+  if (camConnected) await startPreview();
+}
+
+async function startPreview() {
+  stopAllStreams();
+  const camId = document.getElementById('camSel').value;
+  const micId = document.getElementById('micSel').value;
+  try {
+    const vidC = camId ? { deviceId: { ideal: camId } } : true;
+    const audC = {
+      deviceId: micId ? { ideal: micId } : undefined,
+      echoCancellation: false, noiseSuppression: false, autoGainControl: false
+    };
+    prevStream = await navigator.mediaDevices.getUserMedia({ video: vidC, audio: false });
+    micStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: audC }).catch(() => null);
+
+    const vid = document.getElementById('grVid');
+    const placeholder = document.getElementById('grPlaceholder');
+    vid.srcObject = prevStream;
+    vid.style.display = 'block';
+    vid.classList.toggle('flip', document.getElementById('mirrorTgl').checked);
+    await vid.play().catch(() => {});
+    placeholder.style.display = 'none';
+    document.getElementById('grCamBox').classList.add('live');
+    document.getElementById('camDot').classList.add('live');
+
+    camConnected = true;
+    setCheck('chk-cam', true);
+
+    if (micStream) {
+      startMeter(micStream);
+      micConnected = true;
+      document.getElementById('micDot').classList.add('active');
+      setCheck('chk-mic', true);
+      document.getElementById('testRecBtn').disabled = false;
+      document.getElementById('testStatus').textContent = 'Ready — press Record to test your mic';
+    }
+
+    updateEnterBtn();
+  } catch(e) {
+    document.getElementById('grPlaceholder').style.display = 'flex';
+    document.getElementById('grPlaceholder').querySelector('p').innerHTML =
+      '<span style="color:var(--red)">Camera error: ' + e.message + '</span>';
+    document.getElementById('grPlaceholder').querySelector('.gr-connect-btn').disabled = false;
+  }
+}
+
+function stopAllStreams() {
+  if (prevStream) { prevStream.getTracks().forEach(t => t.stop()); prevStream = null; }
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  stopMeter();
+  camConnected = false;
+  micConnected = false;
+}
+
+// ─── CAMERA OPTIONS ─────────────────────────────────────────
+function toggleMirror() {
+  const vid = document.getElementById('grVid');
+  vid.classList.toggle('flip', document.getElementById('mirrorTgl').checked);
+}
+
+// Platform → aspect ratio map
+const platAspect = {
+  yt:    '16/9',
+  tw:    '16/9',
+  li:    '16/9',
+  tk:    '9/16',
+  ig:    '9/16',
+  ytsh:  '9/16',
+  ig4x5: '4/5',
+  igsq:  '1/1'
+};
+const portPlats = ['tk', 'ig', 'ytsh', 'ig4x5', 'igsq'];
+
+function updateCamAspectRatio() {
+  const p = document.getElementById('platSel').value;
+  const ratio = platAspect[p] || '16/9';
+  const box = document.getElementById('grCamBox');
+  box.style.aspectRatio = ratio;
+  // Show ratio badge on camera box
+  let badge = document.getElementById('ratioBadge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.id = 'ratioBadge';
+    badge.style.cssText = 'position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.72);color:var(--lime);font-family:Syne,sans-serif;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;z-index:10;letter-spacing:1px;pointer-events:none';
+    box.appendChild(badge);
+  }
+  badge.textContent = ratio.replace('/', ':');
+}
+
+function onPortChange() {
+  const isPort = document.getElementById('portTgl').checked;
+  // Sync platform to nearest matching option
+  const current = document.getElementById('platSel').value;
+  if (isPort && !portPlats.includes(current)) {
+    document.getElementById('platSel').value = 'tk';
+  } else if (!isPort && portPlats.includes(current)) {
+    document.getElementById('platSel').value = 'yt';
+  }
+  updateCamAspectRatio();
+}
+
+function onPlatformChange() {
+  const p = document.getElementById('platSel').value;
+  document.getElementById('portTgl').checked = portPlats.includes(p);
+  updateCamAspectRatio();
+}
+
+// ─── AUDIO METER ────────────────────────────────────────────
+function startMeter(stream) {
+  stopMeter();
+  try {
+    meterAC = new AudioContext();
+    const src = meterAC.createMediaStreamSource(stream);
+    meterAnalyser = meterAC.createAnalyser();
+    meterAnalyser.fftSize = 512;
+    meterAnalyser.smoothingTimeConstant = 0.5;
+    src.connect(meterAnalyser);
+    const data = new Uint8Array(meterAnalyser.frequencyBinCount);
+    const fill = document.getElementById('grMeter');
+    const tick = () => {
+      meterAnalyser.getByteFrequencyData(data);
+      const avg = data.slice(0, 40).reduce((a, b) => a + b, 0) / 40;
+      fill.style.width = Math.min(100, (avg / 120) * 100) + '%';
+      meterRAF = requestAnimationFrame(tick);
+    };
+    tick();
+  } catch(e) {}
+}
+
+function stopMeter() {
+  if (meterRAF) { cancelAnimationFrame(meterRAF); meterRAF = null; }
+  const fill = document.getElementById('grMeter');
+  if (fill) fill.style.width = '0%';
+  if (meterAC) { try { meterAC.close(); } catch(e) {} meterAC = null; }
+}
+
+// ─── MIC TEST RECORD ────────────────────────────────────────
+async function startMicTest() {
+  if (!micStream) return;
+  if (testRecording) return;
+
+  const btn = document.getElementById('testRecBtn');
+  const statusEl = document.getElementById('testStatus');
+  const playBtn = document.getElementById('testPlayBtn');
+  const retryBtn = document.getElementById('testRetryBtn');
+
+  // Stop any existing playback
+  if (testAudio) { testAudio.pause(); testAudio = null; }
+  document.getElementById('testPlayBtn').disabled = true;
+  retryBtn.style.display = 'none';
+
+  // Get fresh mic stream for recording
+  const micId = document.getElementById('micSel').value;
+  let recStream;
+  try {
+    recStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        deviceId: micId ? { ideal: micId } : undefined,
+        echoCancellation: document.getElementById('echoTgl').checked,
+        noiseSuppression: document.getElementById('noiseTgl').checked,
+        autoGainControl: document.getElementById('gainTgl').checked
+      }
+    });
+  } catch(e) {
+    statusEl.textContent = 'Could not access mic for test';
+    return;
+  }
+
+  // Countdown 3-2-1
+  let count = 3;
+  btn.disabled = true;
+  statusEl.textContent = `Recording in ${count}...`;
+  testCountdownInt = setInterval(() => {
+    count--;
+    if (count > 0) {
+      statusEl.textContent = `Recording in ${count}...`;
+    } else {
+      clearInterval(testCountdownInt);
+      doRecord(recStream, statusEl, playBtn, retryBtn);
+    }
+  }, 1000);
+}
+
+function doRecord(stream, statusEl, playBtn, retryBtn) {
+  testChunks = [];
+  testRecording = true;
+  wavePoints = [];
+
+  const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+    ? 'audio/webm;codecs=opus' : 'audio/webm';
+  testRecorder = new MediaRecorder(stream, { mimeType: mime });
+
+  // Draw waveform while recording
+  const waveWrap = document.getElementById('testWaveformWrap');
+  waveWrap.style.display = 'block';
+  const canvas = document.getElementById('waveCanvas');
+  canvas.width = waveWrap.clientWidth * window.devicePixelRatio;
+  canvas.height = waveWrap.clientHeight * window.devicePixelRatio;
+  const ctx = canvas.getContext('2d');
+
+  // Analyser for waveform
+  let waveAC, waveAnalyser, waveRAF;
+  try {
+    waveAC = new AudioContext();
+    const src = waveAC.createMediaStreamSource(stream);
+    waveAnalyser = waveAC.createAnalyser();
+    waveAnalyser.fftSize = 128;
+    src.connect(waveAnalyser);
+    const wData = new Uint8Array(waveAnalyser.frequencyBinCount);
+    let elapsed = 0;
+    const DURATION = 5000;
+    const start = Date.now();
+
+    const drawWave = () => {
+      elapsed = Date.now() - start;
+      waveAnalyser.getByteFrequencyData(wData);
+      const avg = wData.slice(0, 20).reduce((a, b) => a + b, 0) / 20;
+      wavePoints.push(avg);
+
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#131920';
+      ctx.fillRect(0, 0, w, h);
+
+      const step = w / Math.max(wavePoints.length, 60);
+      ctx.beginPath();
+      ctx.strokeStyle = '#b8ff57';
+      ctx.lineWidth = 1.5 * window.devicePixelRatio;
+      wavePoints.forEach((v, i) => {
+        const x = i * step;
+        const barH = (v / 255) * h * 0.8;
+        const y = (h - barH) / 2;
+        if (i === 0) ctx.moveTo(x, h / 2);
+        else ctx.lineTo(x, y + barH / 2);
+      });
+      ctx.stroke();
+
+      // Progress line
+      const prog = Math.min(1, elapsed / DURATION);
+      ctx.fillStyle = 'rgba(184,255,87,0.15)';
+      ctx.fillRect(0, 0, prog * w, h);
+
+      if (elapsed < DURATION && testRecording) {
+        waveRAF = requestAnimationFrame(drawWave);
+        statusEl.textContent = `Recording... ${Math.ceil((DURATION - elapsed) / 1000)}s remaining`;
+      } else if (testRecording) {
+        testRecorder.stop();
+      }
+    };
+    drawWave();
+
+    testRecorder.onstop = () => {
+      testRecording = false;
+      if (waveRAF) cancelAnimationFrame(waveRAF);
+      if (waveAC) waveAC.close().catch(() => {});
+      stream.getTracks().forEach(t => t.stop());
+
+      const blob = new Blob(testChunks, { type: 'audio/webm' });
+      if (testAudioURL) URL.revokeObjectURL(testAudioURL);
+      testAudioURL = URL.createObjectURL(blob);
+
+      // Draw static waveform
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#131920';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const step2 = canvas.width / Math.max(wavePoints.length, 1);
+      ctx.strokeStyle = '#b8ff57';
+      ctx.lineWidth = 1.5 * window.devicePixelRatio;
+      ctx.beginPath();
+      wavePoints.forEach((v, i) => {
+        const x = i * step2;
+        const barH = (v / 255) * canvas.height * 0.75;
+        const y = (canvas.height - barH) / 2;
+        if (i === 0) ctx.moveTo(x, canvas.height / 2);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      playBtn.disabled = false;
+      retryBtn.style.display = 'flex';
+      document.getElementById('testRecBtn').disabled = false;
+      statusEl.textContent = '✓ Recorded! Press Play Back to hear yourself.';
+      micTestDone = true;
+      setCheck('chk-test', true);
+      updateEnterBtn();
+      toast('Mic test recorded — hit Play Back to hear yourself');
+    };
+
+  } catch(e) {
+    statusEl.textContent = 'Waveform unavailable — recording anyway';
+  }
+
+  testRecorder.ondataavailable = e => { if (e.data.size > 0) testChunks.push(e.data); };
+  testRecorder.start(100);
+  setTimeout(() => { if (testRecording && testRecorder.state !== 'inactive') testRecorder.stop(); }, 5100);
+}
+
+function playMicTest() {
+  if (!testAudioURL) return;
+  if (testAudio) { testAudio.pause(); testAudio = null; }
+
+  testAudio = new Audio(testAudioURL);
+  const bar = document.getElementById('playbackBar');
+  bar.style.width = '0%';
+
+  testAudio.ontimeupdate = () => {
+    if (testAudio.duration) {
+      bar.style.width = (testAudio.currentTime / testAudio.duration * 100) + '%';
+    }
+  };
+  testAudio.onended = () => {
+    bar.style.width = '0%';
+    document.getElementById('testStatus').textContent = 'Playback complete. Sounds good? You\'re ready!';
+  };
+
+  testAudio.play().catch(() => {
+    document.getElementById('testStatus').textContent = 'Playback failed — try again';
+  });
+  document.getElementById('testStatus').textContent = 'Playing back your mic test...';
+}
+
+function retryMicTest() {
+  if (testAudio) { testAudio.pause(); testAudio = null; }
+  document.getElementById('testPlayBtn').disabled = true;
+  document.getElementById('testRetryBtn').style.display = 'none';
+  document.getElementById('testWaveformWrap').style.display = 'none';
+  document.getElementById('testStatus').textContent = 'Ready — press Record to test your mic again';
+  micTestDone = false;
+  setCheck('chk-test', false);
+  updateEnterBtn();
+  wavePoints = [];
+}
+
+// ─── BANNER PREVIEW ─────────────────────────────────────────
+function updateBannerPreview(which) {
+  const isTop = which === 'top';
+  const enable = document.getElementById(isTop ? 'topTickerEnable' : 'botTickerEnable').checked;
+  const text = document.getElementById(isTop ? 'topTickerText' : 'botTickerText').value.trim();
+  const prev = document.getElementById(isTop ? 'topBannerPrev' : 'botBannerPrev');
+  const prevTxt = document.getElementById(isTop ? 'topBannerPrevTxt' : 'botBannerPrevTxt');
+
+  if (enable && text) {
+    prev.style.display = 'block';
+    const color = isTop ? topTickerColor : botTickerColor;
+    const repeated = text + ' ●  ' + text + ' ●  ' + text + ' ●  ';
+    prevTxt.textContent = repeated;
+    prevTxt.style.color = color;
+  } else {
+    prev.style.display = 'none';
+  }
+
+  // Update banner checklist
+  const topOn = document.getElementById('topTickerEnable').checked && document.getElementById('topTickerText').value.trim();
+  const botOn = document.getElementById('botTickerEnable').checked && document.getElementById('botTickerText').value.trim();
+  setCheck('chk-banner', topOn || botOn);
+}
+
+function setTickerColor(which, color, el) {
+  // Update active dot
+  const section = which === 'top' ? 'topBannerPrev' : 'botBannerPrev';
+  el.closest('.gr-sec').querySelectorAll('.cp-dot').forEach(d => d.style.border = '2px solid transparent');
+  el.style.border = '2px solid #fff';
+
+  if (which === 'top') { topTickerColor = color; }
+  else { botTickerColor = color; }
+  updateBannerPreview(which);
+}
+
+// ─── HEADSHOT ────────────────────────────────────────────────
+function loadHeadshot(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('hsPreview');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    img.previousElementSibling.style.display = 'none'; // hide svg icon
+  };
+  reader.readAsDataURL(file);
+}
+
+// ─── CHECKLIST ───────────────────────────────────────────────
+function setCheck(id, done) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('ok', done);
+}
+
+// ─── ENTER STUDIO ────────────────────────────────────────────
+function updateEnterBtn() {
+  const btn = document.getElementById('enterBtn');
+  const note = document.getElementById('enterNote');
+  if (!camConnected) {
+    btn.disabled = true;
+    note.textContent = 'Connect your camera & mic to continue';
+  } else if (!micTestDone) {
+    btn.disabled = false; // allow entry even without test
+    note.textContent = 'Tip: Run the mic test before recording';
+  } else {
+    btn.disabled = false;
+    note.textContent = 'All set — you\'re ready to record!';
+  }
+}
+
+function enterStudio() {
+  if (!camConnected) { toast('⚠️ Connect your camera first'); return; }
+  const s = window.symplSettings = {
+    camId: document.getElementById('camSel').value,
+    micId: document.getElementById('micSel').value,
+    quality: document.getElementById('qualSel').value,
+    platform: document.getElementById('platSel').value,
+    countdown: parseInt(document.getElementById('cdownSel').value),
+    mirror: document.getElementById('mirrorTgl').checked,
+    portrait: document.getElementById('portTgl').checked,
+    noiseSuppress: document.getElementById('noiseTgl').checked,
+    echoCancel: document.getElementById('echoTgl').checked,
+    autoGain: document.getElementById('gainTgl').checked,
+    gainBoost: parseFloat(document.getElementById('gainSlider').value),
+    topTicker: {
+      enabled: document.getElementById('topTickerEnable').checked,
+      text: document.getElementById('topTickerText').value.trim(),
+      speed: document.getElementById('topTickerSpeed').value,
+      color: topTickerColor
+    },
+    botTicker: {
+      enabled: document.getElementById('botTickerEnable').checked,
+      text: document.getElementById('botTickerText').value.trim(),
+      speed: document.getElementById('botTickerSpeed').value,
+      color: botTickerColor
+    },
+    chyron: {
+      enabled: document.getElementById('chyronEnable').checked,
+      name: document.getElementById('chyronName').value.trim(),
+      role: document.getElementById('chyronRole').value.trim(),
+      photoSrc: document.getElementById('hsPreview').src || null
+    }
+  };
+  // Transfer streams instead of stopping them — camera stays alive across the transition
+  const transferredCam = prevStream;
+  const transferredMic = micStream;
+  // Detach from green room without killing the tracks
+  prevStream = null;
+  micStream = null;
+  stopMeter();
+  camConnected = false;
+  micConnected = false;
+  // Detach green room video element so the stream can be reused
+  const grVid = document.getElementById('grVid');
+  grVid.srcObject = null;
+  grVid.style.display = 'none';
+  document.getElementById('grPlaceholder').style.display = 'flex';
+  document.getElementById('grCamBox').classList.remove('live');
+
+  initRecordingScreen(s, transferredCam, transferredMic);
+  showPage('recScreen');
+  document.getElementById('rNoiseTgl').checked = s.noiseSuppress;
+  document.getElementById('rEchoTgl').checked = s.echoCancel;
+  document.getElementById('rGainTgl').checked = s.autoGain;
+}
+
+// ══════════════════════════════════════════════════════
+//  RECORDING ENGINE — Part 2
+// ══════════════════════════════════════════════════════
+let recSettings = null;
+let recCamStream = null, recMicStream = null, recCombStream = null;
+let recMediaRec = null, recChunks = [];
+let recIsRecording = false, recIsPaused = false, recIsMuted = false;
+let recMicTracks = [];
+let recTimerInt = null, recSecs = 0;
+let recRAF = null;
+let recordings = [];
+let pendingRecIdx = -1;
+
+// Canvas compositing state
+let recCamVid = null;
+let topTickX = 0, botTickX = 0;
+let chyronX = -400, chyronTargetX = 0, chyronPhase = 'idle'; // idle, animating, visible
+let chyronStartTime = 0;
+let hsImage = null;
+let frameColor = '#b8ff57';
+let prevFrameTime = 0;
+
+// Speed map px/frame at 30fps
+const tickSpeedMap = { slow: 0.6, medium: 1.4, fast: 2.8 };
+
+function initRecordingScreen(s, transferredCam, transferredMic) {
+  recSettings = s;
+
+  // Set canvas aspect ratio wrapper
+  const outer = document.getElementById('canvasOuter');
+  const platAspectMap = { yt:'land', tw:'land', li:'land', tk:'port', ig:'port', ytsh:'port', ig4x5:'four5', igsq:'sq' };
+  outer.className = 'canvas-outer ' + (platAspectMap[s.platform] || 'land');
+
+  // Ticker offsets start off-screen right
+  topTickX = 0; botTickX = 0;
+
+  // Preload headshot image
+  hsImage = null;
+  if (s.chyron.enabled && s.chyron.photoSrc && s.chyron.photoSrc.length > 10) {
+    const img = new Image();
+    img.onload = () => { hsImage = img; };
+    img.src = s.chyron.photoSrc;
+  }
+
+  // Reset chyron
+  chyronPhase = s.chyron.enabled && (s.chyron.name || s.chyron.role) ? 'waiting' : 'idle';
+  chyronX = -500;
+
+  // Edit tab disabled until we have a clip
+  document.getElementById('rnEdit').disabled = recordings.length === 0;
+
+  // Start camera preview on canvas — use transferred streams if available
+  startCanvasPreview(s, transferredCam, transferredMic);
+  setRecStatus('Camera starting...', '');
+}
+
+async function startCanvasPreview(s, transferredCam, transferredMic) {
+  try {
+    // Prefer transferred stream — camera is already warm and permissions granted
+    if (transferredCam && transferredCam.active) {
+      recCamStream = transferredCam;
+    } else {
+      // Fallback: request fresh stream (e.g. returning from Settings)
+      const camId = s.camId;
+      const qMap = { '720p':{w:1280,h:720}, '1080p':{w:1920,h:1080}, '2k':{w:2560,h:1440}, '4k':{w:3840,h:2160} };
+      const {w,h} = qMap[s.quality] || {w:1280,h:720};
+      const vidC = camId ? {deviceId:{ideal:camId},width:{ideal:w},height:{ideal:h}} : {width:{ideal:w},height:{ideal:h}};
+      recCamStream = await navigator.mediaDevices.getUserMedia({ video: vidC, audio: false });
+    }
+
+    if (transferredMic && transferredMic.active) {
+      recMicStream = transferredMic;
+    } else {
+      const micId = s.micId;
+      const audC = {
+        deviceId: micId ? {ideal:micId} : undefined,
+        echoCancellation: s.echoCancel,
+        noiseSuppression: s.noiseSuppress,
+        autoGainControl: s.autoGain
+      };
+      recMicStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: audC }).catch(() => null);
+    }
+
+    // Hidden video element for canvas drawing
+    recCamVid = document.createElement('video');
+    recCamVid.srcObject = recCamStream;
+    recCamVid.autoplay = true;
+    recCamVid.muted = true;
+    recCamVid.playsInline = true;
+
+    // Set handler BEFORE play — transferred streams fire loadedmetadata almost instantly
+    const metaReady = new Promise(res => {
+      if (recCamVid.readyState >= 1) { res(); return; }
+      recCamVid.onloadedmetadata = () => res();
+      // Safety timeout — start anyway after 2s even if event never fires
+      setTimeout(res, 2000);
+    });
+
+    await recCamVid.play().catch(() => {});
+
+    // If readyState already ≥ 1 by now, metaReady resolves immediately
+    await metaReady;
+    sizeCanvas();
+    startCompositeLoop();
+
+    if (recMicStream) {
+      startRecMeter(recMicStream);
+      recMicTracks = recMicStream.getAudioTracks();
+    }
+
+    document.getElementById('recCanvas').classList.add('live');
+    setRecStatus('Live preview — ready to record', 'ok');
+    document.getElementById('recChip').textContent = 'LIVE';
+    document.getElementById('recChip').className = 'status-chip live';
+  } catch(e) {
+    setRecStatus('Camera error: ' + e.message, 'warn');
+    toast('⚠️ ' + e.message);
+  }
+}
+
+function sizeCanvas() {
+  const canvas = document.getElementById('recCanvas');
+  const vw = recCamVid.videoWidth || 1280;
+  const vh = recCamVid.videoHeight || 720;
+  canvas.width = vw;
+  canvas.height = vh;
+}
+
+function startCompositeLoop() {
+  if (recRAF) cancelAnimationFrame(recRAF);
+  const canvas = document.getElementById('recCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const loop = (ts) => {
+    const dt = prevFrameTime ? Math.min((ts - prevFrameTime) / 16.67, 3) : 1;
+    prevFrameTime = ts;
+    drawFrame(ctx, canvas, dt);
+    recRAF = requestAnimationFrame(loop);
+  };
+  recRAF = requestAnimationFrame(loop);
+}
+
+function drawFrame(ctx, canvas, dt) {
+  const cw = canvas.width, ch = canvas.height;
+  const s = recSettings;
+  if (!s) return;
+
+  ctx.clearRect(0, 0, cw, ch);
+
+  // 1 ── Camera feed
+  if (recCamVid && recCamVid.readyState >= 2) {
+    ctx.save();
+    if (s.mirror) {
+      ctx.translate(cw, 0);
+      ctx.scale(-1, 1);
+    }
+    ctx.drawImage(recCamVid, 0, 0, cw, ch);
+    ctx.restore();
+  } else {
+    ctx.fillStyle = '#0a1520';
+    ctx.fillRect(0, 0, cw, ch);
+  }
+
+  const style = document.getElementById('frameStyle').value;
+  const thick = parseInt(document.getElementById('frameThick').value) || 12;
+  const TICKER_H = Math.round(ch * 0.048);
+  const FONT_SIZE = Math.round(TICKER_H * 0.52);
+
+  // 2 ── Top ticker
+  if (s.topTicker.enabled && s.topTicker.text) {
+    drawTicker(ctx, cw, ch, 0, TICKER_H, s.topTicker, 'top', dt);
+  }
+
+  // 3 ── Bottom ticker
+  if (s.botTicker.enabled && s.botTicker.text) {
+    drawTicker(ctx, cw, ch, ch - TICKER_H, TICKER_H, s.botTicker, 'bot', dt);
+  }
+
+  // 4 ── Frame border
+  if (style !== 'none') {
+    drawFrameBorder(ctx, cw, ch, style, thick);
+  }
+
+  // 5 ── Chyron
+  if (s.chyron.enabled && (s.chyron.name || s.chyron.role)) {
+    drawChyron(ctx, cw, ch, dt);
+  }
+}
+
+function drawTicker(ctx, cw, ch, yPos, bannerH, tickerCfg, dir, dt) {
+  const speed = tickSpeedMap[tickerCfg.speed] || 1.4;
+
+  // Ticker background
+  ctx.fillStyle = 'rgba(0,0,0,0.88)';
+  ctx.fillRect(0, yPos, cw, bannerH);
+
+  // Separator line
+  ctx.fillStyle = frameColor;
+  ctx.fillRect(0, dir === 'top' ? yPos + bannerH - 2 : yPos, cw, 2);
+
+  const fontSize = Math.round(bannerH * 0.52);
+  ctx.font = `700 ${fontSize}px 'DM Sans', sans-serif`;
+  ctx.fillStyle = tickerCfg.color || '#b8ff57';
+  ctx.textBaseline = 'middle';
+
+  const sep = '  ●  ';
+  const fullText = tickerCfg.text + sep + tickerCfg.text + sep;
+  const textW = ctx.measureText(fullText).width;
+  const textY = yPos + bannerH / 2;
+
+  if (dir === 'top') {
+    // Right to left
+    topTickX -= speed * dt;
+    if (topTickX < -textW) topTickX = 0;
+    ctx.fillText(fullText, topTickX, textY);
+    ctx.fillText(fullText, topTickX + textW, textY);
+  } else {
+    // Left to right
+    botTickX += speed * dt;
+    if (botTickX > textW) botTickX = 0;
+    ctx.fillText(fullText, botTickX - textW, textY);
+    ctx.fillText(fullText, botTickX, textY);
+  }
+}
+
+function drawFrameBorder(ctx, cw, ch, style, thick) {
+  if (style === 'cinematic') {
+    // Letterbox bars
+    const barH = thick === 4 ? Math.round(ch * 0.06) : thick === 12 ? Math.round(ch * 0.12) : Math.round(ch * 0.2);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, cw, barH);
+    ctx.fillRect(0, ch - barH, cw, barH);
+    // Subtle scope line
+    ctx.fillStyle = 'rgba(80,80,80,0.4)';
+    ctx.fillRect(0, barH, cw, 1);
+    ctx.fillRect(0, ch - barH - 1, cw, 1);
+    return;
+  }
+
+  if (style === 'creator') {
+    // Neon gradient border (lime to cyan)
+    const grad = ctx.createLinearGradient(0, 0, cw, ch);
+    grad.addColorStop(0, '#b8ff57');
+    grad.addColorStop(1, '#22d3ee');
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = thick;
+    ctx.strokeRect(thick / 2, thick / 2, cw - thick, ch - thick);
+    // Corner glow dots
+    const dotR = thick * 0.7;
+    [[thick/2, thick/2, '#b8ff57'], [cw - thick/2, thick/2, '#22d3ee'],
+     [thick/2, ch - thick/2, '#22d3ee'], [cw - thick/2, ch - thick/2, '#b8ff57']
+    ].forEach(([x, y, c]) => {
+      ctx.beginPath(); ctx.arc(x, y, dotR, 0, Math.PI * 2);
+      ctx.fillStyle = c; ctx.fill();
+    });
+    return;
+  }
+
+  if (style === 'podcast') {
+    // Gold gradient
+    const grad = ctx.createLinearGradient(0, 0, cw, ch);
+    grad.addColorStop(0, '#f5c842');
+    grad.addColorStop(0.5, '#ffe080');
+    grad.addColorStop(1, '#c8960a');
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = thick;
+    ctx.strokeRect(thick / 2, thick / 2, cw - thick, ch - thick);
+    // Inner dark line
+    ctx.strokeStyle = 'rgba(100,60,0,0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(thick + 2, thick + 2, cw - thick * 2 - 4, ch - thick * 2 - 4);
+    // Corner ornament squares
+    const cs = Math.max(6, thick * 0.6);
+    ctx.fillStyle = '#ffe080';
+    [[0,0],[cw-cs,0],[0,ch-cs],[cw-cs,ch-cs]].forEach(([x,y]) => ctx.fillRect(x, y, cs, cs));
+    return;
+  }
+
+  if (style === 'news') {
+    // Red border
+    ctx.strokeStyle = frameColor;
+    ctx.lineWidth = thick;
+    ctx.strokeRect(thick / 2, thick / 2, cw - thick, ch - thick);
+    // White inner hairline
+    ctx.strokeStyle = 'rgba(255,255,255,0.65)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(thick + 3, thick + 3, cw - thick * 2 - 6, ch - thick * 2 - 6);
+    // Gold corner L-marks
+    const cs = Math.max(20, thick * 2.2);
+    ctx.strokeStyle = '#f5c842';
+    ctx.lineWidth = Math.max(2, thick * 0.22);
+    const corners = [[0,0,1,1],[cw,0,-1,1],[0,ch,1,-1],[cw,ch,-1,-1]];
+    corners.forEach(([x, y, sx, sy]) => {
+      ctx.beginPath();
+      ctx.moveTo(x, y + sy * cs); ctx.lineTo(x, y); ctx.lineTo(x + sx * cs, y);
+      ctx.stroke();
+    });
+    return;
+  }
+
+  // Fallback solid border
+  ctx.strokeStyle = frameColor;
+  ctx.lineWidth = thick;
+  ctx.strokeRect(thick / 2, thick / 2, cw - thick, ch - thick);
+}
+
+function drawChyron(ctx, cw, ch, dt) {
+  const s = recSettings.chyron;
+  const CHYRON_H = Math.round(ch * 0.1);
+  const CHYRON_Y = ch - Math.round(ch * 0.06) - CHYRON_H;
+  const MAX_W = Math.round(cw * 0.52);
+  const PHOTO_R = CHYRON_H * 0.38;
+
+  // Animate slide-in
+  if (chyronPhase === 'waiting' && recIsRecording) {
+    chyronPhase = 'animating';
+    chyronStartTime = performance.now();
+    chyronX = -MAX_W - 20;
+  }
+  if (chyronPhase === 'animating') {
+    const elapsed = performance.now() - chyronStartTime;
+    const prog = Math.min(1, elapsed / 900);
+    const ease = 1 - Math.pow(1 - prog, 3);
+    chyronX = (-MAX_W - 20) + ease * (MAX_W + 30);
+    if (prog >= 1) { chyronX = 14; chyronPhase = 'visible'; }
+  }
+
+  const x = chyronX;
+  if (x > MAX_W + 20) return;
+
+  // Background
+  ctx.fillStyle = 'rgba(0,0,0,0.88)';
+  roundRect(ctx, x, CHYRON_Y, MAX_W, CHYRON_H, 7);
+  ctx.fill();
+
+  // Accent bar
+  ctx.fillStyle = frameColor;
+  roundRect(ctx, x, CHYRON_Y, 5, CHYRON_H, [3, 0, 0, 3]);
+  ctx.fill();
+
+  // Photo circle
+  const photoX = x + 16;
+  const photoY = CHYRON_Y + CHYRON_H / 2;
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(photoX, photoY, PHOTO_R, 0, Math.PI * 2);
+  ctx.clip();
+  if (hsImage) {
+    ctx.drawImage(hsImage, photoX - PHOTO_R, photoY - PHOTO_R, PHOTO_R * 2, PHOTO_R * 2);
+  } else {
+    const grad = ctx.createLinearGradient(photoX - PHOTO_R, photoY - PHOTO_R, photoX + PHOTO_R, photoY + PHOTO_R);
+    grad.addColorStop(0, '#b8ff57'); grad.addColorStop(1, '#22d3ee');
+    ctx.fillStyle = grad; ctx.fill();
+  }
+  ctx.restore();
+
+  // Name
+  const nameFS = Math.round(CHYRON_H * 0.34);
+  ctx.font = `700 ${nameFS}px 'DM Sans', sans-serif`;
+  ctx.fillStyle = '#ffffff';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(s.name || 'Your Name', x + PHOTO_R * 2 + 22, CHYRON_Y + CHYRON_H * 0.35);
+
+  // Role
+  const roleFS = Math.round(CHYRON_H * 0.26);
+  ctx.font = `600 ${roleFS}px 'DM Sans', sans-serif`;
+  ctx.fillStyle = frameColor;
+  ctx.fillText(s.role || '', x + PHOTO_R * 2 + 22, CHYRON_Y + CHYRON_H * 0.68);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  const radii = Array.isArray(r) ? r : [r, r, r, r];
+  ctx.beginPath();
+  ctx.moveTo(x + radii[0], y);
+  ctx.lineTo(x + w - radii[1], y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + radii[1]);
+  ctx.lineTo(x + w, y + h - radii[2]);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - radii[2], y + h);
+  ctx.lineTo(x + radii[3], y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - radii[3]);
+  ctx.lineTo(x, y + radii[0]);
+  ctx.quadraticCurveTo(x, y, x + radii[0], y);
+  ctx.closePath();
+}
+
+// ── FRAME CONTROLS ─────────────────────────────────────
+function onFrameChange() {
+  const style = document.getElementById('frameStyle').value;
+  const cinematic = style === 'cinematic';
+  const creator = style === 'creator';
+  document.getElementById('frameColorGroup').style.opacity = (cinematic || creator) ? '0.3' : '1';
+  document.getElementById('frameColorGroup').style.pointerEvents = (cinematic || creator) ? 'none' : '';
+}
+
+function setFrameColor(color, el) {
+  frameColor = color;
+  document.querySelectorAll('#frameColorRow .cpd').forEach(d => d.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function applyCustomFrameColor(color) {
+  frameColor = color;
+  document.querySelectorAll('#frameColorRow .cpd').forEach(d => d.classList.remove('active'));
+  document.querySelector('.cpd-custom').classList.add('active');
+}
+
+// ── RECORDING ─────────────────────────────────────────
+function bestMime() {
+  const types = ['video/mp4;codecs=h264,aac','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+  for (const t of types) { if (MediaRecorder.isTypeSupported(t)) return t; }
+  return '';
+}
+
+function getAudioConstraints() {
+  const micId = recSettings?.micId;
+  return {
+    deviceId: micId ? {ideal:micId} : undefined,
+    echoCancellation: document.getElementById('rEchoTgl').checked,
+    noiseSuppression: document.getElementById('rNoiseTgl').checked,
+    autoGainControl: document.getElementById('rGainTgl').checked
+  };
+}
+
+async function startRecording() {
+  if (!recSettings) { toast('⚠️ Go through the Green Room first'); return; }
+  if (recIsRecording) return;
+  recChunks = [];
+
+  try {
+    // Get fresh mic stream
+    const audC = getAudioConstraints();
+    const freshMic = await navigator.mediaDevices.getUserMedia({ audio: audC }).catch(() => null);
+    recMicTracks = freshMic ? freshMic.getAudioTracks() : [];
+
+    // Route mic through shared soundboard AudioContext
+    // This means soundboard sounds + mic both end up in sbMixDest → recording
+    const ctx = getSbCtx();
+    if (freshMic) {
+      const boost = recSettings.gainBoost || 1;
+      const micSrc = ctx.createMediaStreamSource(freshMic);
+      const micGain = ctx.createGain();
+      micGain.gain.value = boost;
+      micSrc.connect(micGain);
+      micGain.connect(sbMixDest); // mic → mix (NOT speakers, avoids feedback)
+    }
+
+    // Canvas video stream
+    const canvas = document.getElementById('recCanvas');
+    const canvasStream = canvas.captureStream(30);
+
+    // Combine canvas video + mixed audio (mic + soundboard)
+    const tracks = [...canvasStream.getVideoTracks()];
+    tracks.push(...sbMixDest.stream.getAudioTracks());
+    recCombStream = new MediaStream(tracks);
+
+    await runCountdown(recSettings.countdown || 0);
+
+    const mime = bestMime();
+    recMediaRec = new MediaRecorder(recCombStream, mime ? { mimeType: mime } : {});
+    recMediaRec.ondataavailable = e => { if (e.data.size > 0) recChunks.push(e.data); };
+    recMediaRec.onstop = finalizeRecording;
+    recMediaRec.start(250);
+
+    recIsRecording = true;
+    recIsPaused = false;
+    recSecs = 0;
+
+    // Trigger chyron animation
+    if (chyronPhase === 'waiting') chyronPhase = 'animating', chyronStartTime = performance.now();
+
+    document.getElementById('recCanvas').classList.remove('live');
+    document.getElementById('recCanvas').classList.add('recording');
+    document.getElementById('recBadge').style.display = 'flex';
+    document.getElementById('recTimer').style.display = 'block';
+    document.getElementById('recChip').textContent = '● REC';
+    document.getElementById('recChip').className = 'status-chip rec-active';
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('stopBtn').disabled = false;
+    document.getElementById('pauseBtn').disabled = false;
+    document.getElementById('muteBtn').disabled = false;
+    setRecStatus('Recording...', 'rec');
+    updateSbRecordingState(true);
+
+    recTimerInt = setInterval(() => {
+      if (!recIsPaused) recSecs++;
+      const m = String(Math.floor(recSecs / 60)).padStart(2, '0');
+      const s = String(recSecs % 60).padStart(2, '0');
+      document.getElementById('recTimer').textContent = m + ':' + s;
+    }, 1000);
+
+  } catch(e) {
+    setRecStatus('Error: ' + e.message, 'warn');
+    toast('⚠️ ' + e.message);
+    console.error(e);
+  }
+}
+
+async function runCountdown(n) {
+  if (n <= 0) return;
+  const ov = document.getElementById('cdownOv');
+  const num = document.getElementById('cdownN');
+  ov.style.display = 'flex';
+  return new Promise(res => {
+    let r = n;
+    const tick = () => {
+      num.textContent = r;
+      num.style.animation = 'none';
+      void num.offsetWidth;
+      num.style.animation = 'cPop 1s ease-in-out';
+      r--;
+      if (r < 0) { ov.style.display = 'none'; res(); }
+      else setTimeout(tick, 1000);
+    };
+    tick();
+  });
+}
+
+function stopRecording() {
+  if (recMediaRec && recMediaRec.state !== 'inactive') recMediaRec.stop();
+  clearInterval(recTimerInt);
+  recIsRecording = false;
+  recIsPaused = false;
+  recIsMuted = false;
+  recMicTracks.forEach(t => { t.enabled = true; });
+  document.getElementById('recBadge').style.display = 'none';
+  document.getElementById('pauseBadge').style.display = 'none';
+  document.getElementById('muteFlag').style.display = 'none';
+  document.getElementById('stopBtn').disabled = true;
+  document.getElementById('pauseBtn').disabled = true;
+  document.getElementById('muteBtn').disabled = true;
+  document.getElementById('recChip').textContent = 'PROCESSING';
+  document.getElementById('recChip').className = 'status-chip';
+  setRecStatus('Processing clip...', '');
+  // Reset chyron for next recording
+  chyronPhase = recSettings?.chyron?.enabled ? 'waiting' : 'idle';
+  chyronX = -500;
+}
+
+function togglePauseRec() {
+  if (!recMediaRec) return;
+  const btn = document.getElementById('pauseBtn');
+  if (!recIsPaused) {
+    recMediaRec.pause(); recIsPaused = true;
+    document.getElementById('recBadge').style.display = 'none';
+    document.getElementById('pauseBadge').style.display = 'block';
+    document.getElementById('recCanvas').classList.remove('recording');
+    document.getElementById('recCanvas').classList.add('paused-rec');
+    document.getElementById('recChip').textContent = '⏸ PAUSED';
+    document.getElementById('recChip').className = 'status-chip paused-chip';
+    btn.textContent = '▶ Resume';
+    setRecStatus('Paused', '');
+  } else {
+    recMediaRec.resume(); recIsPaused = false;
+    document.getElementById('pauseBadge').style.display = 'none';
+    document.getElementById('recBadge').style.display = 'flex';
+    document.getElementById('recCanvas').classList.add('recording');
+    document.getElementById('recCanvas').classList.remove('paused-rec');
+    document.getElementById('recChip').textContent = '● REC';
+    document.getElementById('recChip').className = 'status-chip rec-active';
+    btn.textContent = '⏸ Pause';
+    setRecStatus('Recording...', 'rec');
+  }
+}
+
+function toggleMuteRec() {
+  recIsMuted = !recIsMuted;
+  recMicTracks.forEach(t => { t.enabled = !recIsMuted; });
+  document.getElementById('muteFlag').style.display = recIsMuted ? 'block' : 'none';
+  document.getElementById('muteBtn').textContent = recIsMuted ? '🎤 Unmute' : '🎤 Mute Mic';
+}
+
+function finalizeRecording() {
+  const blob = new Blob(recChunks, { type: recMediaRec?.mimeType || 'video/webm' });
+  if (recCombStream) recCombStream.getTracks().forEach(t => t.stop());
+  recCombStream = null;
+
+  const isMp4 = blob.type.includes('mp4');
+  const url = URL.createObjectURL(blob);
+  const num = recordings.filter(Boolean).length + 1;
+  const dur = String(Math.floor(recSecs / 60)).padStart(2, '0') + ':' + String(recSecs % 60).padStart(2, '0');
+  const rec = {
+    url, blob,
+    name: 'Clip ' + num,
+    dur, ext: isMp4 ? 'mp4' : 'webm',
+    quality: recSettings.quality,
+    portrait: recSettings.portrait,
+    settings: { ...recSettings }
+  };
+  recordings.push(rec);
+  pendingRecIdx = recordings.length - 1;
+
+  addClipToList(rec, pendingRecIdx);
+
+  document.getElementById('recCanvas').classList.remove('recording', 'paused-rec');
+  document.getElementById('recCanvas').classList.add('live');
+  document.getElementById('recTimer').style.display = 'none';
+  document.getElementById('recChip').textContent = 'LIVE';
+  document.getElementById('recChip').className = 'status-chip live';
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('rnEdit').disabled = false;
+  setRecStatus('Clip ' + num + ' saved (' + dur + ') — ready for next recording', 'ok');
+  toast('✅ Clip ' + num + ' saved! (' + dur + ')');
+  updateSbRecordingState(false);
+}
+
+function addClipToList(rec, idx) {
+  document.getElementById('recEmptyMsg')?.remove();
+  const list = document.getElementById('recClipList');
+  const el = document.createElement('div');
+  el.className = 'rclip-card'; el.id = 'rclip-' + idx;
+  el.innerHTML = `<div class="rct"><video src="${rec.url}" muted></video></div>
+    <div class="rci"><div class="rcn">${rec.name}</div><div class="rcm">${rec.dur} · ${rec.ext.toUpperCase()} · ${rec.quality}</div></div>
+    <div class="rca">
+      <button class="ricb dl" title="Download" onclick="downloadClip(${idx})"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M3 21h18"/></svg></button>
+      <button class="ricb rm" title="Delete" onclick="deleteClip(${idx})"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+    </div>`;
+  list.insertBefore(el, list.firstChild);
+  const v = el.querySelector('video');
+  v.addEventListener('loadeddata', () => { try { v.currentTime = 0.5; } catch(e) {} });
+}
+
+function downloadClip(idx) {
+  const r = recordings[idx]; if (!r) return;
+  const a = document.createElement('a');
+  a.href = r.url;
+  a.download = r.name.replace(/\s/g, '-') + '.' + r.ext;
+  a.click();
+  toast('⬇️ Downloading ' + r.name);
+}
+
+function deleteClip(idx) {
+  if (!recordings[idx]) return;
+  document.getElementById('rclip-' + idx)?.remove();
+  URL.revokeObjectURL(recordings[idx].url);
+  recordings[idx] = null;
+  if (!recordings.filter(Boolean).length) {
+    document.getElementById('recClipList').innerHTML =
+      '<div class="rempty" id="recEmptyMsg"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="width:20px;height:20px;opacity:0.18;display:block;margin:0 auto 5px"><path d="M15 10l4.553-2.069A1 1 0 0121 8.868v6.264a1 1 0 01-1.447.899L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>Nothing recorded yet</div>';
+    document.getElementById('rnEdit').disabled = true;
+  }
+  toast('🗑 Deleted');
+}
+
+// ── MIC METER (recording screen) ────────────────────
+let recMeterAC = null, recMeterAnalyser = null, recMeterRAF = null;
+function startRecMeter(stream) {
+  stopRecMeter();
+  try {
+    recMeterAC = new AudioContext();
+    const src = recMeterAC.createMediaStreamSource(stream);
+    recMeterAnalyser = recMeterAC.createAnalyser();
+    recMeterAnalyser.fftSize = 512;
+    recMeterAnalyser.smoothingTimeConstant = 0.5;
+    src.connect(recMeterAnalyser);
+    const data = new Uint8Array(recMeterAnalyser.frequencyBinCount);
+    const fill = document.getElementById('recMeter');
+    const tick = () => {
+      recMeterAnalyser.getByteFrequencyData(data);
+      const avg = data.slice(0, 40).reduce((a, b) => a + b, 0) / 40;
+      fill.style.width = Math.min(100, (avg / 120) * 100) + '%';
+      recMeterRAF = requestAnimationFrame(tick);
+    };
+    tick();
+  } catch(e) {}
+}
+function stopRecMeter() {
+  if (recMeterRAF) { cancelAnimationFrame(recMeterRAF); recMeterRAF = null; }
+  const f = document.getElementById('recMeter'); if (f) f.style.width = '0%';
+  if (recMeterAC) { try { recMeterAC.close(); } catch(e) {} recMeterAC = null; }
+}
+
+// ── NAV HELPERS ─────────────────────────────────────
+function goGreenRoomFromRec() {
+  if (recIsRecording) stopRecording();
+  if (recRAF) { cancelAnimationFrame(recRAF); recRAF = null; }
+  // Stop the recording screen's streams fully
+  if (recCamStream) { recCamStream.getTracks().forEach(t => t.stop()); recCamStream = null; }
+  if (recMicStream) { recMicStream.getTracks().forEach(t => t.stop()); recMicStream = null; }
+  if (recCamVid) { recCamVid.srcObject = null; recCamVid = null; }
+  stopRecMeter();
+  showPage('greenRoom');
+  // Re-start green room — fresh streams now (camera was fully released above)
+  setTimeout(() => connectDevices(), 300);
+}
+
+function goToEditor() {
+  if (!recordings.filter(Boolean).length) { toast('⚠️ Record something first'); return; }
+  // Part 3 will handle full editor — for now show a toast
+  toast('✂️ Editor coming in Part 3!');
+}
+
+function setRecStatus(msg, state) {
+  const dot = document.getElementById('rsDot');
+  const txt = document.getElementById('rsTxt');
+  if (txt) txt.textContent = msg;
+  if (dot) dot.className = 'rsdot' + (state ? ' ' + state : '');
+}
+
+// Keyboard shortcuts for recording screen
+document.addEventListener('keydown', e => {
+  const tag = e.target.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  const page = document.querySelector('.page.active')?.id;
+  if (page === 'recScreen') {
+    if (e.key === 'r' || e.key === 'R') { if (recIsRecording) stopRecording(); else startRecording(); }
+    if ((e.key === 'p' || e.key === 'P') && recIsRecording) togglePauseRec();
+    if ((e.key === 'm' || e.key === 'M') && recIsRecording) toggleMuteRec();
+  }
+});
+
+// ── SOUNDBOARD ENGINE ────────────────────────────────
+// Shared AudioContext for soundboard + mic mixing
+let sbCtx = null;
+let sbMasterGain = null;
+let sbMixDest = null;       // MediaStreamDestination — feeds into recording
+let sbMicSrc = null;        // mic plugged into sbCtx
+let sbMasterVolume = 0.8;
+let sbOpen = true;
+
+// Per-pad state
+const SB_COUNT = 6;
+const SB_CUSTOM = 3;
+let sbPadNodes = new Array(SB_COUNT + SB_CUSTOM).fill(null);  // active AudioBufferSourceNode
+let sbPadPlaying = new Array(SB_COUNT + SB_CUSTOM).fill(false);
+let sbCustomBuffers = [null, null, null];
+
+// Ensure AudioContext exists
+function getSbCtx() {
+  if (!sbCtx || sbCtx.state === 'closed') {
+    sbCtx = new AudioContext();
+    sbMasterGain = sbCtx.createGain();
+    sbMasterGain.gain.value = sbMasterVolume;
+    sbMixDest = sbCtx.createMediaStreamDestination();
+    sbMasterGain.connect(sbCtx.destination);  // speakers
+    sbMasterGain.connect(sbMixDest);          // recording mix
+  }
+  if (sbCtx.state === 'suspended') sbCtx.resume();
+  return sbCtx;
+}
+
+// Plug mic into the shared AudioContext so both go into recording
+function plugMicIntoSbCtx(micStream) {
+  if (!micStream) return;
+  const ctx = getSbCtx();
+  if (sbMicSrc) { try { sbMicSrc.disconnect(); } catch(e) {} }
+  const micGain = ctx.createGain();
+  micGain.gain.value = 1.0;
+  sbMicSrc = ctx.createMediaStreamSource(micStream);
+  sbMicSrc.connect(micGain);
+  micGain.connect(sbMixDest);  // mic → mix dest (recording only, NOT speakers to avoid feedback)
+}
+
+// ── BUILT-IN SOUND SYNTHESIS ─────────────────────────
+function synthIntroSting(ctx) {
+  // Ascending 3-note sting
+  const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+  const buf = ctx.createBuffer(1, ctx.sampleRate * 1.2, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  notes.forEach((freq, ni) => {
+    const start = Math.floor(ni * 0.22 * ctx.sampleRate);
+    const len = Math.floor(0.38 * ctx.sampleRate);
+    for (let i = 0; i < len && start + i < data.length; i++) {
+      const t = i / ctx.sampleRate;
+      const env = Math.exp(-t * 3.5);
+      data[start + i] += Math.sin(2 * Math.PI * freq * t) * 0.38 * env;
+      data[start + i] += Math.sin(2 * Math.PI * freq * 2 * t) * 0.12 * env;
+    }
+  });
+  return buf;
+}
+
+function synthApplause(ctx) {
+  // Shaped noise burst
+  const len = ctx.sampleRate * 2.5;
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) {
+    const t = i / ctx.sampleRate;
+    const env = t < 0.3 ? (t / 0.3) : Math.exp(-(t - 0.3) * 1.1);
+    const ripple = 0.7 + 0.3 * Math.sin(2 * Math.PI * 7 * t);
+    data[i] = (Math.random() * 2 - 1) * 0.45 * env * ripple;
+  }
+  return buf;
+}
+
+function synthAirHorn(ctx) {
+  const len = ctx.sampleRate * 1.4;
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  const freq = 233.08;
+  for (let i = 0; i < len; i++) {
+    const t = i / ctx.sampleRate;
+    const env = t < 0.05 ? (t / 0.05) : Math.exp(-(t - 0.05) * 0.6);
+    // Sawtooth
+    const phase = (freq * t) % 1;
+    data[i] = (phase * 2 - 1) * 0.5 * env;
+    // Add harmonics
+    data[i] += Math.sin(2 * Math.PI * freq * 2 * t) * 0.18 * env;
+    data[i] += Math.sin(2 * Math.PI * freq * 3 * t) * 0.1 * env;
+  }
+  return buf;
+}
+
+function synthRimshot(ctx) {
+  const len = ctx.sampleRate * 0.55;
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) {
+    const t = i / ctx.sampleRate;
+    // Snare tone
+    const snare = Math.sin(2 * Math.PI * 200 * t) * Math.exp(-t * 40);
+    // Noise crack
+    const crack = (Math.random() * 2 - 1) * Math.exp(-t * 30) * 0.6;
+    // Stick hit at t=0
+    const stick = t < 0.008 ? Math.sin(2 * Math.PI * 1200 * t) * (1 - t / 0.008) * 0.8 : 0;
+    data[i] = (snare * 0.4 + crack + stick) * Math.min(1, t < 0.002 ? t / 0.002 : 1);
+  }
+  return buf;
+}
+
+function synthFanfare(ctx) {
+  const chords = [[523.25,659.25,783.99], [659.25,830.61,987.77], [783.99,987.77,1174.66]];
+  const len = ctx.sampleRate * 2.0;
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  chords.forEach((chord, ci) => {
+    const start = Math.floor(ci * 0.38 * ctx.sampleRate);
+    const dur = ctx.sampleRate * 0.7;
+    for (let i = 0; i < dur && start + i < len; i++) {
+      const t = i / ctx.sampleRate;
+      const env = t < 0.02 ? (t / 0.02) : Math.exp(-(t - 0.02) * 2.5);
+      chord.forEach(f => {
+        data[start + i] += Math.sin(2 * Math.PI * f * t) * 0.22 * env;
+        data[start + i] += Math.sin(2 * Math.PI * f * 2 * t) * 0.06 * env;
+      });
+    }
+  });
+  return buf;
+}
+
+function synthAlert(ctx) {
+  const len = ctx.sampleRate * 0.7;
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  const beeps = [880, 1100];
+  beeps.forEach((freq, bi) => {
+    const start = Math.floor(bi * 0.22 * ctx.sampleRate);
+    const dur = Math.floor(0.18 * ctx.sampleRate);
+    for (let i = 0; i < dur; i++) {
+      const t = i / ctx.sampleRate;
+      const env = t < 0.01 ? (t / 0.01) : t > 0.14 ? Math.max(0, (0.18 - t) / 0.04) : 1;
+      data[start + i] = Math.sin(2 * Math.PI * freq * t) * 0.5 * env;
+    }
+  });
+  return buf;
+}
+
+const SYNTH_FNS = [synthIntroSting, synthApplause, synthAirHorn, synthRimshot, synthFanfare, synthAlert];
+
+// Cache synthesized buffers
+let sbBuiltinBuffers = new Array(SB_COUNT).fill(null);
+
+function getSbBuffer(idx) {
+  const ctx = getSbCtx();
+  if (!sbBuiltinBuffers[idx]) {
+    sbBuiltinBuffers[idx] = SYNTH_FNS[idx](ctx);
+  }
+  return sbBuiltinBuffers[idx];
+}
+
+// ── PAD TRIGGER ─────────────────────────────────────
+function triggerPad(idx) {
+  const ctx = getSbCtx();
+  const padEl = document.getElementById('sbp-' + idx);
+
+  // Stop if already playing
+  if (sbPadPlaying[idx]) {
+    if (sbPadNodes[idx]) { try { sbPadNodes[idx].stop(); } catch(e) {} }
+    sbPadNodes[idx] = null;
+    sbPadPlaying[idx] = false;
+    padEl.classList.remove('playing');
+    return;
+  }
+
+  const buffer = getSbBuffer(idx);
+  if (!buffer) return;
+
+  const src = ctx.createBufferSource();
+  src.buffer = buffer;
+  const gain = ctx.createGain();
+  gain.gain.value = sbMasterVolume;
+  src.connect(gain);
+  gain.connect(sbMasterGain);
+
+  src.onended = () => {
+    sbPadPlaying[idx] = false;
+    sbPadNodes[idx] = null;
+    padEl.classList.remove('playing');
+  };
+
+  src.start();
+  sbPadNodes[idx] = src;
+  sbPadPlaying[idx] = true;
+  padEl.classList.add('playing');
+}
+
+function triggerCustomPad(idx) {
+  const buf = sbCustomBuffers[idx];
+  const padIdx = SB_COUNT + idx;
+  const padEl = document.getElementById('sbp-c' + idx);
+
+  if (!buf) { sbCustomClick(idx); return; }
+
+  const ctx = getSbCtx();
+
+  if (sbPadPlaying[padIdx]) {
+    if (sbPadNodes[padIdx]) { try { sbPadNodes[padIdx].stop(); } catch(e) {} }
+    sbPadNodes[padIdx] = null;
+    sbPadPlaying[padIdx] = false;
+    padEl.classList.remove('playing');
+    return;
+  }
+
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const gain = ctx.createGain();
+  gain.gain.value = sbMasterVolume;
+  src.connect(gain);
+  gain.connect(sbMasterGain);
+
+  src.onended = () => {
+    sbPadPlaying[padIdx] = false;
+    sbPadNodes[padIdx] = null;
+    padEl.classList.remove('playing');
+  };
+
+  src.start();
+  sbPadNodes[padIdx] = src;
+  sbPadPlaying[padIdx] = true;
+  padEl.classList.add('playing');
+}
+
+function sbCustomClick(idx) {
+  if (sbCustomBuffers[idx]) {
+    // Has a sound — trigger it
+    triggerCustomPad(idx);
+  } else {
+    // No sound — open file picker
+    document.getElementById('sbFile' + idx).click();
+  }
+}
+
+async function loadCustomSound(idx, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const ctx = getSbCtx();
+  const arrayBuf = await file.arrayBuffer();
+  ctx.decodeAudioData(arrayBuf, buf => {
+    sbCustomBuffers[idx] = buf;
+    const padEl = document.getElementById('sbp-c' + idx);
+    padEl.classList.remove('custom-empty');
+    // Truncate filename nicely
+    const name = file.name.replace(/\.[^.]+$/, '').substring(0, 10);
+    document.getElementById('sbp-c' + idx).querySelector('.sb-pad-icon').textContent = '🎵';
+    document.getElementById('sbcn-' + idx).textContent = name;
+    // Update onclick to trigger
+    padEl.onclick = () => sbCustomClick(idx);
+    toast('✅ ' + name + ' loaded to pad ' + (idx + 1));
+  }, () => toast('⚠️ Could not decode audio file'));
+}
+
+// ── MASTER VOLUME ─────────────────────────────────────
+function setSbMasterVol(v) {
+  sbMasterVolume = v / 100;
+  if (sbMasterGain) sbMasterGain.gain.value = sbMasterVolume;
+  document.getElementById('sbMasterVolVal').textContent = v + '%';
+}
+
+// ── ACCORDION ─────────────────────────────────────────
+function toggleSoundboard() {
+  sbOpen = !sbOpen;
+  document.getElementById('sbBody').classList.toggle('open', sbOpen);
+  document.getElementById('sbArrow').classList.toggle('open', sbOpen);
+}
+
+// ── SHOW BAKED INDICATOR WHEN RECORDING ───────────────
+function updateSbRecordingState(isRec) {
+  const ind = document.getElementById('sbRecIndicator');
+  if (ind) ind.classList.toggle('active', isRec);
+}
+
+function toast(msg, dur = 2800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+</script>
+</body>
+</html>
